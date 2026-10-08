@@ -1,61 +1,62 @@
 <div class="app-shell">
-  <div class="sidebar">
-    <a class="brand" routerLink="/">
-      <span class="brand-logo"><i class="pi pi-wallet"></i></span>
-      <span class="brand-name">Finanzas Manager</span>
-    </a>
-
-    <nav class="side-nav" aria-label="Secciones">
-      <div class="nav-section" *ngFor="let section of navVisible">
-        <p class="nav-section-title">{{ section.titulo }}</p>
-
-        <a *ngFor="let item of section.items" [routerLink]="item.ruta" routerLinkActive="active"
-          class="nav-item">
-          <i [class]="item.icono"></i>
-          <span>{{ item.label }}</span>
-        </a>
-      </div>
-    </nav>
-
-    <div class="side-footer">
-      <div class="side-user">
-        <p-avatar [label]="authService.inicialUsuario()" shape="circle" styleClass="user-avatar">
-        </p-avatar>
-
-        <div class="side-user-meta">
-          <span class="side-user-name">{{ authService.nombre() }}</span>
-          <span class="side-user-rol">{{ authService.rol() }}</span>
-        </div>
-      </div>
-
-      <div class="side-actions">
-        <button type="button" class="tema-btn" (click)="themeService.alternar()"
-          [attr.aria-label]="themeService.etiquetaTema()" [pTooltip]="themeService.etiquetaTema()"
-          tooltipPosition="top">
-          <i [class]="themeService.iconoTema()"></i>
-        </button>
-
-        <p-button icon="pi pi-sign-out" severity="secondary" [outlined]="true"
-          styleClass="logout-btn" ariaLabel="Cerrar sesion" [rounded]="true"
-          (onClick)="confirmarLogout()"></p-button>
-      </div>
-    </div>
-  </div>
-
-  <div class="app-main">
-    <header class="topbar">
+  <header class="topbar">
+    <div class="topbar-inner">
       <button type="button" class="menu-btn" (click)="drawerVisible.set(true)"
         aria-label="Abrir menu de navegacion" pTooltip="Menu" tooltipPosition="bottom">
         <i class="pi pi-bars"></i>
       </button>
 
-      <span class="brand-name brand-mobile">Finanzas Manager</span>
-    </header>
+      <a class="brand" routerLink="/">
+        <span class="brand-logo"><i class="pi pi-wallet"></i></span>
+        <span class="brand-name">Finanzas Manager</span>
+      </a>
 
-    <main class="app-content">
-      <router-outlet></router-outlet>
-    </main>
-  </div>
+      <nav class="nav-links" aria-label="Secciones">
+        <a routerLink="/clientes" routerLinkActive="active" *ngIf="puedeVerClientes">
+          <i class="pi pi-users"></i>
+          <span>Clientes</span>
+        </a>
+        <a routerLink="/propiedades" routerLinkActive="active" *ngIf="puedeVerPropiedades">
+          <i class="pi pi-building"></i>
+          <span>Propiedades</span>
+        </a>
+        <a routerLink="/tipos-propiedad" routerLinkActive="active" *ngIf="puedeVerTiposPropiedad">
+          <i class="pi pi-tags"></i>
+          <span>Tipos</span>
+        </a>
+        <a routerLink="/usuarios" routerLinkActive="active" *ngIf="puedeVerUsuarios">
+          <i class="pi pi-id-card"></i>
+          <span>Usuarios</span>
+        </a>
+        <a routerLink="/roles" routerLinkActive="active" *ngIf="puedeVerRoles">
+          <i class="pi pi-shield"></i>
+          <span>Roles</span>
+        </a>
+      </nav>
+
+      <div class="user-area">
+        <p-button label="Salir" icon="pi pi-sign-out" severity="secondary" [outlined]="true"
+          styleClass="logout-btn" ariaLabel="Cerrar sesion" (onClick)="confirmarLogout()"></p-button>
+
+        <button type="button" class="tema-btn" (click)="themeService.alternar()"
+          [attr.aria-label]="themeService.etiquetaTema()" [pTooltip]="themeService.etiquetaTema()"
+          tooltipPosition="bottom">
+          <i [class]="themeService.iconoTema()"></i>
+        </button>
+
+        <div class="user-meta">
+          <span class="user-name">{{ authService.nombre() }}</span>
+          <span class="user-rol">{{ authService.rol() }}</span>
+        </div>
+
+        <p-avatar [label]="authService.inicialUsuario()" shape="circle" styleClass="user-avatar"></p-avatar>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-content">
+    <router-outlet></router-outlet>
+  </main>
 </div>
 
 <p-drawer [visible]="drawerVisible()" (visibleChange)="drawerVisible.set($event)" position="left"
@@ -68,15 +69,30 @@
   </ng-template>
 
   <nav class="drawer-links" aria-label="Secciones">
-    <ng-container *ngFor="let section of navVisible">
-      <p class="nav-section-title">{{ section.titulo }}</p>
-
-      <a *ngFor="let item of section.items" [routerLink]="item.ruta" routerLinkActive="active"
-        (click)="drawerVisible.set(false)">
-        <i [class]="item.icono"></i>
-        <span>{{ item.label }}</span>
-      </a>
-    </ng-container>
+    <a routerLink="/clientes" routerLinkActive="active" *ngIf="puedeVerClientes"
+      (click)="drawerVisible.set(false)">
+      <i class="pi pi-users"></i>
+      <span>Clientes</span>
+    </a>
+    <a routerLink="/propiedades" routerLinkActive="active" *ngIf="puedeVerPropiedades"
+      (click)="drawerVisible.set(false)">
+      <i class="pi pi-building"></i>
+      <span>Propiedades</span>
+    </a>
+    <a routerLink="/tipos-propiedad" routerLinkActive="active" *ngIf="puedeVerTiposPropiedad"
+      (click)="drawerVisible.set(false)">
+      <i class="pi pi-tags"></i>
+      <span>Tipos de propiedad</span>
+    </a>
+    <a routerLink="/usuarios" routerLinkActive="active" *ngIf="puedeVerUsuarios"
+      (click)="drawerVisible.set(false)">
+      <i class="pi pi-id-card"></i>
+      <span>Usuarios</span>
+    </a>
+    <a routerLink="/roles" routerLinkActive="active" *ngIf="puedeVerRoles" (click)="drawerVisible.set(false)">
+      <i class="pi pi-shield"></i>
+      <span>Roles</span>
+    </a>
   </nav>
 
   <ng-template #footer>

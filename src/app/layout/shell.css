@@ -1,25 +1,28 @@
 .app-shell {
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     background-color: var(--app-bg);
 }
 
-/* ==========================================================================
-   Sidebar (escritorio)
-   ========================================================================== */
+/* ---- Topbar ---- */
 
-.sidebar {
+.topbar {
     position: sticky;
     top: 0;
     z-index: 100;
-    display: flex;
-    flex-direction: column;
-    width: 260px;
-    flex: none;
-    height: 100vh;
-    padding: 20px 16px;
     background-color: var(--app-surface);
-    border-right: 1px solid var(--app-border);
+    border-bottom: 1px solid var(--app-border);
+}
+
+.topbar-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .brand {
@@ -29,7 +32,7 @@
     text-decoration: none;
     color: var(--app-text);
     white-space: nowrap;
-    padding: 6px 8px 18px;
+    margin-right: 12px;
 }
 
 .brand-logo {
@@ -50,34 +53,18 @@
     letter-spacing: -0.015em;
 }
 
-.side-nav {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    margin-top: 6px;
-}
-
-.nav-section + .nav-section {
-    margin-top: 18px;
-    padding-top: 18px;
-    border-top: 1px solid var(--app-border);
-}
-
-.nav-section-title {
-    margin: 0 0 8px;
-    padding: 0 8px;
-    font-size: var(--app-text-xs);
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--app-text-subtle);
-}
-
-.nav-item {
+.nav-links {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
+    gap: 4px;
+    flex: 1;
+}
+
+.nav-links a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
     border-radius: var(--app-radius-sm);
     color: var(--app-text-muted);
     text-decoration: none;
@@ -87,124 +74,53 @@
         color var(--app-duration) var(--app-ease);
 }
 
-.nav-item:hover {
+.nav-links a:hover {
     background-color: var(--app-surface-2);
     color: var(--app-text);
 }
 
-.nav-item.active {
+.nav-links a.active {
     background-color: var(--app-brand-soft);
     color: var(--app-brand-text);
-    font-weight: 600;
 }
 
-.nav-item i {
-    font-size: 1rem;
-}
-
-/* ---- Pie del sidebar ---- */
-
-.side-footer {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid var(--app-border);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.side-user {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-}
-
-.side-user-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    line-height: 1.2;
-    min-width: 0;
-}
-
-.side-user-name {
-    font-weight: 600;
-    font-size: var(--app-text-sm);
-    color: var(--app-text);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.side-user-rol {
-    font-size: var(--app-text-xs);
-    color: var(--app-text-subtle);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.side-actions {
+.user-area {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-left: auto;
 }
 
-.tema-btn {
-    display: grid;
-    place-items: center;
-    width: 38px;
-    height: 38px;
-    flex: none;
-    border-radius: 11px;
-    border: 1px solid var(--app-border);
-    background-color: transparent;
-    color: var(--app-text-muted);
-    cursor: pointer;
-    transition: color var(--app-duration) var(--app-ease),
-        border-color var(--app-duration) var(--app-ease),
-        background-color var(--app-duration) var(--app-ease);
-}
-
-.tema-btn:hover {
-    color: var(--app-brand-text);
-    border-color: var(--app-border-strong);
-    background-color: var(--app-surface-2);
-}
-
-/* El sidebar lleva el usuario y el logout, asi que el boton sin texto pesa menos. */
-:host ::ng-deep .logout-btn {
-    width: 38px;
-    padding-inline: 0;
-    justify-content: center;
-}
-
-/* ==========================================================================
-   Columna principal
-   ========================================================================== */
-
-.app-main {
-    flex: 1;
-    min-width: 0;
+.user-meta {
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    line-height: 1.2;
+    text-align: right;
+    margin-right: 4px;
 }
 
-/* ---- Topbar (solo movil) ---- */
-
-.topbar {
-    display: none;
-    position: sticky;
-    top: 0;
-    z-index: 90;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 16px;
-    background-color: var(--app-surface);
-    border-bottom: 1px solid var(--app-border);
+.user-name {
+    font-weight: 600;
+    font-size: var(--app-text-sm);
+    color: var(--app-text);
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
+.user-rol {
+    font-size: var(--app-text-xs);
+    color: var(--app-text-subtle);
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tema-btn,
 .menu-btn {
     display: grid;
     place-items: center;
@@ -221,25 +137,23 @@
         background-color var(--app-duration) var(--app-ease);
 }
 
+.tema-btn:hover,
 .menu-btn:hover {
     color: var(--app-brand-text);
     border-color: var(--app-border-strong);
     background-color: var(--app-surface-2);
 }
 
-.brand-mobile {
-    font-size: var(--app-text-base);
+.menu-btn {
+    display: none;
 }
 
 .app-content {
     flex: 1;
     min-width: 0;
-    padding: 0;
 }
 
-/* ==========================================================================
-   Drawer (movil)
-   ========================================================================== */
+/* ---- Drawer ---- */
 
 .drawer-header {
     display: flex;
@@ -257,14 +171,6 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-}
-
-.drawer-links .nav-section-title {
-    margin-top: 14px;
-}
-
-.drawer-links .nav-section-title:first-child {
-    margin-top: 0;
 }
 
 .drawer-links a {
@@ -294,23 +200,49 @@
     width: 100%;
 }
 
-/* ==========================================================================
-   Responsive
-   ========================================================================== */
+/* ---- Responsive ---- */
 
-@media (max-width: 900px) {
-    .sidebar {
+@media (max-width: 860px) {
+    .topbar-inner {
+        padding: 10px 16px;
+        gap: 10px;
+    }
+
+    .menu-btn {
+        display: grid;
+    }
+
+    .brand {
+        margin-right: 0;
+    }
+
+    .nav-links {
         display: none;
     }
 
-    .topbar {
-        display: flex;
+    .user-meta {
+        display: none;
+    }
+
+    /* El logout colapsa a solo icono: el drawer ya ofrece la version con texto. */
+    :host ::ng-deep .logout-btn .p-button-label {
+        display: none;
+    }
+
+    :host ::ng-deep .logout-btn {
+        width: 38px;
+        padding-inline: 0;
+        justify-content: center;
     }
 }
 
 @media (max-width: 520px) {
-    .topbar {
+    .topbar-inner {
         padding: 10px 14px;
         gap: 8px;
+    }
+
+    .brand-name {
+        font-size: var(--app-text-base);
     }
 }

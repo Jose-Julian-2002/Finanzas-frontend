@@ -12,19 +12,6 @@ import { AuthService } from '../core/services/auth';
 import { ThemeService } from '../core/services/theme';
 import { CambiarPasswordDialogComponent } from '../features/auth/cambiar-password/cambiar-password-dialog';
 
-interface NavItem {
-  label: string;
-  icono: string;
-  ruta: string;
-  permiso: string;
-}
-
-interface NavSection {
-  id: string;
-  titulo: string;
-  items: NavItem[];
-}
-
 @Component({
   selector: 'app-shell',
   standalone: true,
@@ -50,52 +37,6 @@ export class ShellComponent {
   readonly passwordDialogVisible = signal(false);
   readonly drawerVisible = signal(false);
 
-  /**
-   * Navegacion agrupada por secciones. Al sumar modulos (Prestamos, Pagos)
-   * basta con anadir el item en su seccion: el filtro por permisos y los
-   * titulos se resuelven solos.
-   */
-  readonly navSections: NavSection[] = [
-    {
-      id: 'cartera',
-      titulo: 'Cartera',
-      items: [
-        { label: 'Clientes', icono: 'pi pi-users', ruta: '/clientes', permiso: 'Clientes.Ver' }
-      ]
-    },
-    {
-      id: 'catalogo',
-      titulo: 'Catalogo',
-      items: [
-        {
-          label: 'Propiedades',
-          icono: 'pi pi-building',
-          ruta: '/propiedades',
-          permiso: 'Propiedades.Ver'
-        },
-        {
-          label: 'Tipos de propiedad',
-          icono: 'pi pi-tags',
-          ruta: '/tipos-propiedad',
-          permiso: 'TiposPropiedad.Ver'
-        }
-      ]
-    },
-    {
-      id: 'administrador',
-      titulo: 'Administrador',
-      items: [
-        {
-          label: 'Usuarios',
-          icono: 'pi pi-id-card',
-          ruta: '/usuarios',
-          permiso: 'Usuarios.Ver'
-        },
-        { label: 'Roles', icono: 'pi pi-shield', ruta: '/roles', permiso: 'Roles.Ver' }
-      ]
-    }
-  ];
-
   constructor(
     public authService: AuthService,
     private router: Router,
@@ -106,14 +47,24 @@ export class ShellComponent {
     }
   }
 
-  /** Secciones con items visibles para el rol actual. Las vacias se descartan. */
-  get navVisible(): NavSection[] {
-    return this.navSections
-      .map((seccion) => ({
-        ...seccion,
-        items: seccion.items.filter((item) => this.authService.hasPermission(item.permiso))
-      }))
-      .filter((seccion) => seccion.items.length > 0);
+  get puedeVerClientes(): boolean {
+    return this.authService.hasPermission('Clientes.Ver');
+  }
+
+  get puedeVerPropiedades(): boolean {
+    return this.authService.hasPermission('Propiedades.Ver');
+  }
+
+  get puedeVerTiposPropiedad(): boolean {
+    return this.authService.hasPermission('TiposPropiedad.Ver');
+  }
+
+  get puedeVerUsuarios(): boolean {
+    return this.authService.hasPermission('Usuarios.Ver');
+  }
+
+  get puedeVerRoles(): boolean {
+    return this.authService.hasPermission('Roles.Ver');
   }
 
   confirmarLogout(): void {
