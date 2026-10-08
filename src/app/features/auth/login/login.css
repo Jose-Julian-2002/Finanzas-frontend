@@ -1,0 +1,270 @@
+.login-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    min-height: 100vh;
+    background-color: var(--app-bg);
+}
+
+/* ---- Panel de marca ---- */
+
+.login-marca {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 48px;
+    padding: 56px 60px;
+    color: #eef2ff;
+    background-color: #1e1b4b;
+    background-image:
+        radial-gradient(120% 90% at 8% 0%, rgba(99, 102, 241, 0.55) 0%, rgba(99, 102, 241, 0) 58%),
+        radial-gradient(90% 70% at 100% 100%, rgba(124, 58, 237, 0.5) 0%, rgba(124, 58, 237, 0) 62%),
+        linear-gradient(155deg, #1e1b4b 0%, #241a52 48%, #2b1a54 100%);
+    isolation: isolate;
+}
+
+.marca-contenido {
+    max-width: 34rem;
+}
+
+.marca-identidad {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 56px;
+}
+
+.marca-logo {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    font-size: 1.15rem;
+}
+
+.marca-nombre {
+    font-size: var(--app-text-md);
+    font-weight: 700;
+    letter-spacing: -0.015em;
+}
+
+.marca-titulo {
+    font-size: clamp(2.1rem, 3.1vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+.marca-bajada {
+    font-size: var(--app-text-md);
+    line-height: 1.6;
+    color: #c7cbf5;
+    max-width: 46ch;
+    margin-bottom: 44px;
+}
+
+.marca-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.marca-lista li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.marca-lista i {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 0.9rem;
+    color: #dfe3ff;
+}
+
+.marca-lista span {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: var(--app-text-sm);
+    line-height: 1.45;
+    color: #a8aee0;
+    max-width: 34ch;
+}
+
+.marca-lista strong {
+    font-size: var(--app-text-md);
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+}
+
+.marca-pie {
+    font-size: var(--app-text-xs);
+    color: #8b90c8;
+}
+
+/* ---- Panel del formulario ---- */
+
+.login-panel {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 48px 40px;
+    background-color: var(--app-bg);
+}
+
+.login-tema {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    border: 1px solid var(--app-border);
+    background-color: var(--app-surface);
+    color: var(--app-text-muted);
+    cursor: pointer;
+    transition: color var(--app-duration) var(--app-ease),
+        border-color var(--app-duration) var(--app-ease),
+        transform var(--app-duration) var(--app-ease);
+}
+
+.login-tema:hover {
+    color: var(--app-brand-text);
+    border-color: var(--app-border-strong);
+    transform: translateY(-1px);
+}
+
+.login-formulario {
+    width: 100%;
+    max-width: 24rem;
+}
+
+.login-cabecera {
+    margin-bottom: 32px;
+}
+
+.login-cabecera h2 {
+    font-size: var(--app-text-2xl);
+    letter-spacing: -0.025em;
+    margin-bottom: 8px;
+}
+
+.login-cabecera p {
+    color: var(--app-text-muted);
+    font-size: var(--app-text-base);
+    max-width: 40ch;
+}
+
+:host ::ng-deep .login-error {
+    display: block;
+    margin-bottom: 20px;
+}
+
+:host ::ng-deep .login-boton {
+    margin-top: 4px;
+}
+
+/* ---- Movimiento: un solo momento, entrada con ease-out exponencial ---- */
+
+.marca-identidad,
+.marca-titulo,
+.marca-bajada,
+.marca-lista {
+    animation: entra var(--app-duration) var(--app-ease) both;
+}
+
+.marca-identidad {
+    animation-duration: 420ms;
+}
+
+.marca-titulo {
+    animation-duration: 520ms;
+    animation-delay: 60ms;
+}
+
+.marca-bajada {
+    animation-duration: 520ms;
+    animation-delay: 120ms;
+}
+
+.marca-lista {
+    animation-duration: 520ms;
+    animation-delay: 180ms;
+}
+
+@keyframes entra {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 960px) {
+    .login-page {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .login-marca {
+        padding: 32px 24px;
+        gap: 28px;
+    }
+
+    .marca-identidad {
+        margin-bottom: 32px;
+    }
+
+    .marca-titulo {
+        margin-bottom: 14px;
+    }
+
+    .marca-bajada {
+        margin-bottom: 28px;
+    }
+
+    .marca-lista {
+        gap: 16px;
+    }
+
+    .login-panel {
+        padding: 40px 24px 48px;
+    }
+
+    .login-tema {
+        top: 16px;
+        right: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .marca-lista span {
+        font-size: var(--app-text-xs);
+    }
+
+    .marca-pie {
+        display: none;
+    }
+}

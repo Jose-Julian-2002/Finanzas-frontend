@@ -1,0 +1,87 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Tipos de propiedad</h1>
+      <p class="page-subtitle">Catalogo que clasifica las propiedades del portafolio.</p>
+    </div>
+    <p-button *ngIf="puedeCrear" label="Nuevo tipo" icon="pi pi-plus" (onClick)="abrirCrear()"></p-button>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-box">
+      <input pInputText type="text" [formControl]="controlBusqueda" placeholder="Buscar tipo por nombre"
+        aria-label="Buscar tipos de propiedad" />
+      <p-button *ngIf="controlBusqueda.value" icon="pi pi-times" severity="secondary" [text]="true"
+        [rounded]="true" ariaLabel="Limpiar busqueda" (onClick)="controlBusqueda.setValue('')"></p-button>
+    </div>
+  </div>
+
+  <p-table [value]="tipos()" [loading]="cargando()" dataKey="id" styleClass="tabla-lista">
+
+    <ng-template #header>
+      <tr>
+        <th>Tipo</th>
+        <th class="tabular">Propiedades</th>
+        <th class="col-acciones">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-tipo>
+      <tr>
+        <td class="celda-nombre">{{ tipo.nombre }}</td>
+        <td class="tabular">{{ tipo.totalPropiedades }}</td>
+        <td class="col-acciones">
+          <div class="acciones">
+            <p-button *ngIf="puedeEditar" icon="pi pi-pencil" severity="secondary" [text]="true"
+              [rounded]="true" pTooltip="Editar" tooltipPosition="top" ariaLabel="Editar tipo"
+              (onClick)="abrirEditar(tipo)"></p-button>
+
+            <p-button icon="pi pi-eye" severity="secondary" [text]="true" [rounded]="true" pTooltip="Ver detalle"
+              tooltipPosition="top" ariaLabel="Ver detalle del tipo" (onClick)="abrirDetalle(tipo)"></p-button>
+
+            <p-button *ngIf="puedeEliminar" icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true"
+              [disabled]="tipo.totalPropiedades > 0" pTooltip="Eliminar" tooltipPosition="top"
+              ariaLabel="Eliminar tipo" (onClick)="confirmarEliminar(tipo)"></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="3">
+          <div class="estado-vacio">
+            <i class="pi pi-inbox"></i>
+            <p>No se encontraron tipos de propiedad.</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<app-tipo-propiedad-form-dialog [visible]="formVisible()" (visibleChange)="formVisible.set($event)"
+  [tipo]="tipoEditando()" (guardado)="alGuardar()"></app-tipo-propiedad-form-dialog>
+
+<p-dialog header="Detalle del tipo de propiedad" [visible]="detalleVisible()"
+  (visibleChange)="detalleVisible.set($event)" [modal]="true" [style]="{ width: '30rem' }" [draggable]="false">
+  <ng-container *ngIf="detalleCargando()">
+    <div class="estado-vacio">
+      <i class="pi pi-spin pi-spinner"></i>
+      <p>Cargando tipo...</p>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!detalleCargando() && tipoDetalle() as tipo">
+    <div class="detalle-lista">
+      <div class="detalle-fila">
+        <span class="detalle-label">Nombre</span>
+        <span class="detalle-valor">{{ tipo.nombre }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Propiedades asociadas</span>
+        <span class="detalle-valor tabular">{{ tipo.totalPropiedades }}</span>
+      </div>
+    </div>
+  </ng-container>
+</p-dialog>

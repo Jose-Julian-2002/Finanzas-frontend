@@ -1,0 +1,50 @@
+<p-dialog [visible]="visible" (visibleChange)="visibleChange.emit($event)" [modal]="true" [header]="titulo"
+  [style]="{ width: '460px' }" [draggable]="false" [blockScroll]="true">
+
+  <p-message severity="error" [text]="errorMessage()" *ngIf="errorMessage()"
+    [style]="{ 'margin-bottom': '16px', 'display': 'block' }"></p-message>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="dialog-form">
+    <div class="field">
+      <label for="nombre">Nombre completo</label>
+      <input pInputText id="nombre" formControlName="nombre" placeholder="Ej. Juan Pérez"
+        autocomplete="name" />
+      <small class="field-error" *ngIf="nombre?.invalid && nombre?.touched">
+        Ingrese un nombre de al menos 3 caracteres.
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="gmail">Gmail</label>
+      <input pInputText id="gmail" formControlName="gmail" placeholder="usuario@correo.com" autocomplete="email" />
+      <small class="field-error" *ngIf="gmail?.invalid && gmail?.touched">
+        Ingrese un correo electrónico válido.
+      </small>
+    </div>
+
+    <div class="field" *ngIf="!esEdicion">
+      <label for="password">Contraseña</label>
+      <p-password id="password" formControlName="password" [feedback]="false" [toggleMask]="true"
+        styleClass="w-full" inputStyleClass="w-full" autocomplete="new-password"></p-password>
+      <small class="field-error" *ngIf="password?.invalid && password?.touched">
+        Ingrese una contraseña de al menos 6 caracteres.
+      </small>
+    </div>
+
+    <div class="field" *ngIf="!esEdicion">
+      <label for="rolId">Rol</label>
+      <p-select id="rolId" formControlName="rolId" [options]="roles" optionLabel="nombre" optionValue="id"
+        placeholder="Seleccione un rol" appendTo="body" styleClass="w-full"></p-select>
+      <small class="field-error" *ngIf="rolId?.invalid && rolId?.touched">
+        Seleccione un rol.
+      </small>
+    </div>
+
+    <div class="dialog-actions">
+      <p-button label="Cancelar" severity="secondary" [outlined]="true" type="button" (onClick)="cerrar()">
+      </p-button>
+      <p-button [label]="esEdicion ? 'Guardar cambios' : 'Crear usuario'" icon="pi pi-check" type="submit"
+        [loading]="isLoading()" [disabled]="form.invalid || isLoading()"></p-button>
+    </div>
+  </form>
+</p-dialog>

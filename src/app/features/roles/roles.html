@@ -1,0 +1,148 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Roles</h1>
+      <p class="page-subtitle">Define los roles del sistema y los permisos que cada uno tiene.</p>
+    </div>
+    <p-button *ngIf="puedeCrear" label="Nuevo rol" icon="pi pi-plus" (onClick)="abrirCrear()"></p-button>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-box">
+      <input pInputText type="text" [formControl]="controlBusqueda" placeholder="Buscar rol por nombre"
+        aria-label="Buscar roles" />
+      <p-button *ngIf="controlBusqueda.value" icon="pi pi-times" severity="secondary" [text]="true"
+        [rounded]="true" aria-label="Limpiar búsqueda" (onClick)="controlBusqueda.setValue('')">
+      </p-button>
+    </div>
+  </div>
+
+  <p-table [value]="roles()" [loading]="cargando()" dataKey="id" styleClass="roles-table">
+
+    <ng-template #header>
+      <tr>
+        <th>Rol</th>
+        <th>Usuarios</th>
+        <th>Permisos</th>
+        <th>Tipo</th>
+        <th class="col-acciones">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-rol>
+      <tr>
+        <td>
+          <button type="button" class="enlace-rol" (click)="abrirDetalle(rol)">
+            {{ rol.nombre }}
+          </button>
+          <div class="rol-sub" *ngIf="rol.puedeGestionarUsuarios">
+            <i class="pi pi-shield"></i> Puede gestionar usuarios
+          </div>
+        </td>
+        <td>{{ rol.cantidadUsuarios }}</td>
+        <td>{{ rol.cantidadPermisos }}</td>
+        <td>
+          <p-tag *ngIf="rol.esBase" value="Base" severity="info" />
+          <p-tag *ngIf="!rol.esBase" value="Personalizado" severity="secondary" />
+        </td>
+        <td class="col-acciones">
+          <div class="acciones">
+            <p-button *ngIf="puedeAsignarPermisos" icon="pi pi-key" severity="secondary" [text]="true"
+              [rounded]="true" pTooltip="Permisos" tooltipPosition="top" ariaLabel="Gestionar permisos"
+              (onClick)="abrirPermisos(rol)"></p-button>
+
+            <p-button *ngIf="puedeEditar" icon="pi pi-pencil" severity="secondary" [text]="true"
+              [rounded]="true" [disabled]="rol.esBase" pTooltip="Renombrar" tooltipPosition="top"
+              ariaLabel="Renombrar rol" (onClick)="abrirEditar(rol)"></p-button>
+
+            <p-button *ngIf="puedeEliminar" icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true"
+              [disabled]="rol.esBase" pTooltip="Eliminar" tooltipPosition="top" ariaLabel="Eliminar rol"
+              (onClick)="confirmarEliminar(rol)"></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="5">
+          <div class="estado-vacio">
+            <i class="pi pi-inbox"></i>
+            <p>No se encontraron roles.</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog [visible]="formVisible()" (visibleChange)="formVisible.set($event)" [header]="tituloForm"
+  [modal]="true" [style]="{ width: '420px' }" [draggable]="false" [blockScroll]="true">
+  <p-message severity="error" [text]="formError()" *ngIf="formError()"
+    [style]="{ 'margin-bottom': '16px', 'display': 'block' }"></p-message>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="dialog-form">
+    <div class="field">
+      <label for="nombreRol">Nombre del rol</label>
+      <input pInputText id="nombreRol" formControlName="nombre" placeholder="Ej. Supervisor de crédito" />
+      <small class="field-error" *ngIf="form.get('nombre')?.invalid && form.get('nombre')?.touched">
+        Ingrese un nombre de al menos 3 caracteres.
+      </small>
+    </div>
+
+    <div class="dialog-actions">
+      <p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="formVisible.set(false)">
+      </p-button>
+      <p-button [label]="editando() ? 'Guardar cambios' : 'Crear rol'" icon="pi pi-check" type="submit"
+        [loading]="guardando()" [disabled]="form.invalid || guardando()"></p-button>
+    </div>
+  </form>
+</p-dialog>
+
+<app-permisos-dialog [visible]="permisosVisible()" (visibleChange)="permisosVisible.set($event)"
+  [rolId]="rolPermisos()?.id ?? null" [rolNombre]="rolPermisos()?.nombre ?? ''">
+</app-permisos-dialog>
+
+<p-dialog [visible]="detalleVisible()" (visibleChange)="detalleVisible.set($event)" header="Detalle del rol"
+  [modal]="true" [style]="{ width: '520px' }" [draggable]="false" [blockScroll]="true">
+  <div class="detalle" *ngIf="detalle() as d">
+    <div class="detalle-grid">
+      <div>
+        <span class="detalle-label">Nombre</span>
+        <span class="detalle-valor">{{ d.nombre }}</span>
+      </div>
+      <div>
+        <span class="detalle-label">Usuarios</span>
+        <span class="detalle-valor">{{ d.cantidadUsuarios }}</span>
+      </div>
+      <div>
+        <span class="detalle-label">Rol base</span>
+        <span class="detalle-valor">{{ d.esBase ? 'Sí' : 'No' }}</span>
+      </div>
+      <div>
+        <span class="detalle-label">Gestiona usuarios</span>
+        <span class="detalle-valor">{{ d.puedeGestionarUsuarios ? 'Sí' : 'No' }}</span>
+      </div>
+    </div>
+
+    <div class="detalle-permisos">
+      <h3>Permisos ({{ d.permisos.length }})</h3>
+      <div class="chips">
+        <span class="chip" *ngFor="let permiso of d.permisos">{{ permiso.nombre }}</span>
+      </div>
+      <p class="sin-permisos" *ngIf="d.permisos.length === 0">Este rol no tiene permisos asignados.</p>
+    </div>
+  </div>
+
+  <div class="estado-vacio" *ngIf="detalleCargando()">
+    <i class="pi pi-spin pi-spinner"></i>
+    <p>Cargando rol...</p>
+  </div>
+
+  <ng-template #footer>
+    <div class="dialog-actions">
+      <p-button label="Cerrar" severity="secondary" [outlined]="true" (onClick)="detalleVisible.set(false)">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>

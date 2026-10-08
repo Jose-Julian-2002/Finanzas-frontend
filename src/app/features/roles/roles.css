@@ -1,0 +1,86 @@
+.enlace-rol {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-weight: 600;
+    color: var(--app-brand-text);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color var(--app-duration) var(--app-ease);
+}
+
+.enlace-rol:hover {
+    color: var(--app-brand-hover);
+}
+
+.rol-sub {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 4px;
+    font-size: var(--app-text-xs);
+    color: var(--app-text-subtle);
+}
+
+.detalle-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.detalle-grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px;
+    border-radius: var(--app-radius);
+    background-color: var(--app-surface-2);
+}
+
+.detalle-label {
+    font-size: var(--app-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--app-text-subtle);
+}
+
+.detalle-valor {
+    font-weight: 600;
+    color: var(--app-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.detalle-permisos h3 {
+    font-size: var(--app-text-md);
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.chip {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background-color: var(--app-brand-soft);
+    color: var(--app-brand-text);
+    font-size: var(--app-text-xs);
+    font-weight: 500;
+}
+
+.sin-permisos {
+    color: var(--app-text-subtle);
+    font-size: var(--app-text-base);
+}
+
+@media (max-width: 720px) {
+    .detalle-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

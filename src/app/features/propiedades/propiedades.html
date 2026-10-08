@@ -1,0 +1,147 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Propiedades</h1>
+      <p class="page-subtitle">Inmuebles del portafolio con sus codigos de servicios y contratos.</p>
+    </div>
+    <p-button *ngIf="puedeCrear" label="Nueva propiedad" icon="pi pi-plus" (onClick)="abrirCrear()"></p-button>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-box">
+      <input pInputText type="text" [formControl]="controlBusqueda" placeholder="Buscar por nombre o direccion"
+        aria-label="Buscar propiedades" />
+      <p-button *ngIf="controlBusqueda.value" icon="pi pi-times" severity="secondary" [text]="true"
+        [rounded]="true" ariaLabel="Limpiar busqueda" (onClick)="controlBusqueda.setValue('')"></p-button>
+    </div>
+
+    <div class="toolbar-filters">
+      <p-select [options]="tipos()" optionLabel="nombre" optionValue="id" [ngModel]="tipoFiltro()"
+        (ngModelChange)="onCambiarTipo($event)" placeholder="Todos los tipos" [showClear]="true"
+        appendTo="body" [style]="{ width: '190px' }" ariaLabel="Filtrar por tipo"></p-select>
+
+      <label class="switch-label">
+        <p-toggleSwitch [ngModel]="soloActivos()" (ngModelChange)="onCambiarSoloActivos($event)"></p-toggleSwitch>
+        <span>Solo activas</span>
+      </label>
+    </div>
+  </div>
+
+  <p-table [value]="propiedades()" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [paginator]="true"
+    [rows]="tamano()" [first]="primer()" [totalRecords]="total()" [loading]="cargando()" dataKey="id"
+    [rowsPerPageOptions]="[10, 20, 50]" currentPageReportTemplate="{first} a {last} de {totalRecords}"
+    styleClass="tabla-lista">
+
+    <ng-template #header>
+      <tr>
+        <th>Propiedad</th>
+        <th>Tipo</th>
+        <th>Direccion</th>
+        <th>Servicios</th>
+        <th class="tabular">Contratos</th>
+        <th>Estado</th>
+        <th class="col-acciones">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-propiedad>
+      <tr>
+        <td class="celda-nombre">{{ propiedad.nombre }}</td>
+        <td><p-tag [value]="propiedad.tipoPropiedad" severity="secondary" /></td>
+        <td>
+          <span *ngIf="propiedad.direccion; else sinDireccion">{{ propiedad.direccion }}</span>
+          <ng-template #sinDireccion><span class="texto-inactivo">Sin direccion</span></ng-template>
+        </td>
+        <td>
+          <div class="codigos">
+            <span title="Codigo de luz"><i class="pi pi-sun"></i>{{ propiedad.codigoLuz }}</span>
+            <span title="Codigo de agua"><i class="pi pi-percentage"></i>{{ propiedad.codigoAgua }}</span>
+            <span *ngIf="propiedad.codigoGas" title="Codigo de gas"><i class="pi pi-circle-fill"></i>{{ propiedad.codigoGas }}</span>
+          </div>
+        </td>
+        <td class="tabular">{{ propiedad.totalContratos }}</td>
+        <td>
+          <label class="switch-label">
+            <p-toggleSwitch [ngModel]="propiedad.estado" (ngModelChange)="onCambiarEstado(propiedad, $event)"></p-toggleSwitch>
+            <span>{{ propiedad.estado ? 'Activa' : 'Inactiva' }}</span>
+          </label>
+        </td>
+        <td class="col-acciones">
+          <div class="acciones">
+            <p-button *ngIf="puedeEditar" icon="pi pi-pencil" severity="secondary" [text]="true"
+              [rounded]="true" pTooltip="Editar" tooltipPosition="top" ariaLabel="Editar propiedad"
+              (onClick)="abrirEditar(propiedad)"></p-button>
+
+            <p-button icon="pi pi-eye" severity="secondary" [text]="true" [rounded]="true" pTooltip="Ver detalle"
+              tooltipPosition="top" ariaLabel="Ver detalle de la propiedad" (onClick)="abrirDetalle(propiedad)"></p-button>
+
+            <p-button *ngIf="puedeEliminar && propiedad.estado" icon="pi pi-ban" severity="danger"
+              [text]="true" [rounded]="true" pTooltip="Desactivar" tooltipPosition="top"
+              ariaLabel="Desactivar propiedad" (onClick)="confirmarEliminar(propiedad)"></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="7">
+          <div class="estado-vacio">
+            <i class="pi pi-inbox"></i>
+            <p>No se encontraron propiedades.</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<app-propiedad-form-dialog [visible]="formVisible()" (visibleChange)="formVisible.set($event)"
+  [propiedad]="propiedadEditando()" (guardado)="alGuardar()"></app-propiedad-form-dialog>
+
+<p-dialog header="Detalle de la propiedad" [visible]="detalleVisible()"
+  (visibleChange)="detalleVisible.set($event)" [modal]="true" [style]="{ width: '34rem' }" [draggable]="false">
+  <ng-container *ngIf="detalleCargando()">
+    <div class="estado-vacio">
+      <i class="pi pi-spin pi-spinner"></i>
+      <p>Cargando propiedad...</p>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!detalleCargando() && propiedadDetalle() as propiedad">
+    <div class="detalle-lista">
+      <div class="detalle-fila">
+        <span class="detalle-label">Nombre</span>
+        <span class="detalle-valor">{{ propiedad.nombre }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Tipo</span>
+        <span class="detalle-valor">{{ propiedad.tipoPropiedad }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Direccion</span>
+        <span class="detalle-valor">{{ propiedad.direccion || 'Sin direccion' }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Codigo de luz</span>
+        <span class="detalle-valor tabular">{{ propiedad.codigoLuz }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Codigo de agua</span>
+        <span class="detalle-valor tabular">{{ propiedad.codigoAgua }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Codigo de gas</span>
+        <span class="detalle-valor tabular">{{ propiedad.codigoGas || 'Sin codigo' }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Contratos</span>
+        <span class="detalle-valor tabular">{{ propiedad.totalContratos }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Estado</span>
+        <span class="detalle-valor">{{ propiedad.estado ? 'Activa' : 'Inactiva' }}</span>
+      </div>
+    </div>
+  </ng-container>
+</p-dialog>

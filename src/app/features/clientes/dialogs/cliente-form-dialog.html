@@ -1,0 +1,38 @@
+<p-dialog [visible]="visible" (visibleChange)="visibleChange.emit($event)" [modal]="true" [header]="titulo"
+  [style]="{ width: '460px' }" [draggable]="false" [blockScroll]="true">
+
+  <p-message severity="error" [text]="errorMessage()" *ngIf="errorMessage()"
+    [style]="{ 'margin-bottom': '16px', 'display': 'block' }"></p-message>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="dialog-form">
+    <div class="field">
+      <label for="cliNombre">Nombre completo</label>
+      <input pInputText id="cliNombre" formControlName="nombre" placeholder="Ej. Hija de Rossy"
+        autocomplete="name" />
+      <small class="field-error" *ngIf="nombre?.invalid && nombre?.touched">
+        Ingrese un nombre de al menos 3 caracteres.
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="cliDocumento">Documento de identidad</label>
+      <input pInputText id="cliDocumento" formControlName="documentoIdentidad" placeholder="Ej. 1234567"
+        inputmode="numeric" />
+      <small class="field-hint">Opcional. Varios clientes pueden quedar sin documento.</small>
+    </div>
+
+    <div class="field">
+      <label for="cliTelefono">Telefono o celular</label>
+      <input pInputText id="cliTelefono" formControlName="telefono" placeholder="Ej. 70000000"
+        inputmode="tel" autocomplete="tel" />
+      <small class="field-hint">Opcional.</small>
+    </div>
+
+    <div class="dialog-actions">
+      <p-button label="Cancelar" severity="secondary" [outlined]="true" type="button" (onClick)="cerrar()">
+      </p-button>
+      <p-button [label]="esEdicion ? 'Guardar cambios' : 'Crear cliente'" icon="pi pi-check" type="submit"
+        [loading]="isLoading()" [disabled]="form.invalid || isLoading()"></p-button>
+    </div>
+  </form>
+</p-dialog>

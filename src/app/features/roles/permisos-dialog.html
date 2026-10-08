@@ -1,0 +1,59 @@
+<p-dialog [visible]="visible" (visibleChange)="visibleChange.emit($event)" [modal]="true" header="Permisos del rol"
+  [style]="{ width: '760px' }" [draggable]="false" [blockScroll]="true"
+  [breakpoints]="{ '960px': '92vw' }">
+
+  <ng-template #header>
+    <div class="dialog-header">
+      <span>Permisos de <strong>{{ rolNombre }}</strong></span>
+      <span class="contador">{{ cantidadSeleccionados }} de {{ totalCatalogo() }} seleccionados</span>
+    </div>
+  </ng-template>
+
+  <p-message severity="error" [text]="errorMessage()" *ngIf="errorMessage()"
+    [style]="{ 'margin-bottom': '16px', 'display': 'block' }"></p-message>
+
+  <div class="permisos-buscador">
+    <input pInputText type="text" [ngModel]="controlBusqueda()" (ngModelChange)="onBuscar($event)"
+      placeholder="Filtrar permisos por nombre o descripción" aria-label="Filtrar permisos" />
+  </div>
+
+  <div class="permisos-cuerpo" *ngIf="!cargando(); else cargandoTemplate">
+    <div class="modulo" *ngFor="let grupo of grupos()">
+      <div class="modulo-header">
+        <p-checkbox [binary]="true" [ngModel]="grupoCompleto(grupo)"
+          [indeterminate]="grupoParcial(grupo)" (onChange)="alternarGrupo(grupo)"
+          [inputId]="'grupo-' + grupo.modulo"></p-checkbox>
+        <label [for]="'grupo-' + grupo.modulo">{{ grupo.modulo }}</label>
+      </div>
+
+      <div class="permiso-item" *ngFor="let permiso of grupo.permisos">
+        <p-checkbox [binary]="true" [ngModel]="estaSeleccionado(permiso.id)"
+          (onChange)="alternar(permiso.id)" [inputId]="'permiso-' + permiso.id"></p-checkbox>
+        <label [for]="'permiso-' + permiso.id">
+          <span class="permiso-nombre">{{ permiso.nombre }}</span>
+          <span class="permiso-descripcion" *ngIf="permiso.descripcion">{{ permiso.descripcion }}</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="estado-vacio" *ngIf="grupos().length === 0">
+      <i class="pi pi-inbox"></i>
+      <p>No hay permisos que coincidan con el filtro.</p>
+    </div>
+  </div>
+
+  <ng-template #cargandoTemplate>
+    <div class="estado-vacio">
+      <i class="pi pi-spin pi-spinner"></i>
+      <p>Cargando catálogo de permisos...</p>
+    </div>
+  </ng-template>
+
+  <ng-template #footer>
+    <div class="dialog-actions">
+      <p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="cerrar()"></p-button>
+      <p-button label="Guardar permisos" icon="pi pi-check" (onClick)="guardar()" [loading]="guardando()"
+        [disabled]="cargando() || guardando()"></p-button>
+    </div>
+  </ng-template>
+</p-dialog>

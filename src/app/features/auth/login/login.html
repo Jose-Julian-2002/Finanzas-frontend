@@ -1,0 +1,90 @@
+<div class="login-page">
+
+  <section class="login-marca" aria-label="Sobre Finanzas Manager">
+    <div class="marca-contenido">
+      <div class="marca-identidad">
+        <span class="marca-logo"><i class="pi pi-wallet"></i></span>
+        <span class="marca-nombre">Finanzas Manager</span>
+      </div>
+
+      <h1 class="marca-titulo">Clientes, equipo y accesos en un solo lugar.</h1>
+
+      <p class="marca-bajada">
+        Administracion financiera con control de acceso por rol y permiso, para que cada
+        persona vea exactamente lo que necesita.
+      </p>
+
+      <ul class="marca-lista">
+        <li>
+          <i class="pi pi-users"></i>
+          <span>
+            <strong>Clientes</strong>
+            Registro y consulta de cartera.
+          </span>
+        </li>
+        <li>
+          <i class="pi pi-id-card"></i>
+          <span>
+            <strong>Usuarios</strong>
+            Altas, estados y asignacion de rol.
+          </span>
+        </li>
+        <li>
+          <i class="pi pi-shield"></i>
+          <span>
+            <strong>Roles y permisos</strong>
+            Acceso granular por modulo.
+          </span>
+        </li>
+      </ul>
+    </div>
+
+    <p class="marca-pie">Acceso restringido a personal autorizado.</p>
+  </section>
+
+  <section class="login-panel">
+    <button type="button" class="login-tema" (click)="themeService.alternar()"
+      [attr.aria-label]="themeService.etiquetaTema()" [pTooltip]="themeService.etiquetaTema()"
+      tooltipPosition="bottom">
+      <i [class]="themeService.iconoTema()"></i>
+    </button>
+
+    <div class="login-formulario">
+      <header class="login-cabecera">
+        <h2>Inicie sesion</h2>
+        <p>Use su correo institucional y su contrasena para continuar.</p>
+      </header>
+
+      <p-message severity="error" [text]="mensajeError()" *ngIf="mensajeError()"
+        styleClass="login-error"></p-message>
+
+      <form [formGroup]="formLogin" (ngSubmit)="iniciarSesion()" class="dialog-form" novalidate>
+        <div class="field">
+          <label for="gmail">Correo electronico</label>
+          <input pInputText id="gmail" formControlName="gmail" type="email" autocomplete="email"
+            placeholder="usuario@correo.com" [attr.aria-invalid]="!!gmail?.invalid && gmail?.touched"
+            aria-describedby="gmail-error" />
+          <small class="field-error" id="gmail-error" *ngIf="gmail?.invalid && gmail?.touched">
+            Ingrese un correo electronico valido, por ejemplo usuario@correo.com.
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="password">Contrasena</label>
+          <p-password id="password" formControlName="password" placeholder="Ingrese su contrasena"
+            [feedback]="false" [toggleMask]="true" [fluid]="true" autocomplete="current-password"
+            [attr.aria-invalid]="!!password?.invalid && password?.touched" aria-describedby="password-error">
+          </p-password>
+          <small class="field-error" id="password-error" *ngIf="password?.invalid && password?.touched">
+            La contrasena es obligatoria.
+          </small>
+        </div>
+
+        <p-button label="Ingresar" type="submit" icon="pi pi-arrow-right" iconPos="right"
+          [disabled]="formLogin.invalid || isLoading()" [loading]="isLoading()" [fluid]="true"
+          styleClass="login-boton"></p-button>
+      </form>
+    </div>
+  </section>
+
+</div>

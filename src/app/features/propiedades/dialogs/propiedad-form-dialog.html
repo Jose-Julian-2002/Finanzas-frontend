@@ -1,0 +1,63 @@
+<p-dialog [visible]="visible" (visibleChange)="visibleChange.emit($event)" [modal]="true" [header]="titulo"
+  [style]="{ width: '520px' }" [draggable]="false" [blockScroll]="true">
+
+  <p-message severity="error" [text]="errorMessage()" *ngIf="errorMessage()"
+    [style]="{ 'margin-bottom': '16px', 'display': 'block' }"></p-message>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="dialog-form">
+    <div class="field">
+      <label for="propTipo">Tipo de propiedad</label>
+      <p-select inputId="propTipo" formControlName="tipoPropiedadId" [options]="tipos()" optionLabel="nombre"
+        optionValue="id" placeholder="Seleccione un tipo" appendTo="body" styleClass="w-full"></p-select>
+      <small class="field-error" *ngIf="tipoPropiedadId?.invalid && tipoPropiedadId?.touched">
+        Seleccione un tipo de propiedad.
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="propNombre">Nombre</label>
+      <input pInputText id="propNombre" formControlName="nombre" placeholder="Ej. Casa conjunto La Sabana" />
+      <small class="field-error" *ngIf="nombre?.invalid && nombre?.touched">
+        Ingrese un nombre de al menos 3 caracteres.
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="propDireccion">Direccion</label>
+      <input pInputText id="propDireccion" formControlName="direccion" placeholder="Ej. Calle 100 #20-35"
+        autocomplete="street-address" />
+      <small class="field-hint">Opcional.</small>
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="propLuz">Codigo de luz</label>
+        <input pInputText id="propLuz" formControlName="codigoLuz" placeholder="Ej. L883120" />
+        <small class="field-error" *ngIf="codigoLuz?.invalid && codigoLuz?.touched">
+          El codigo de luz es obligatorio.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="propAgua">Codigo de agua</label>
+        <input pInputText id="propAgua" formControlName="codigoAgua" placeholder="Ej. A883120" />
+        <small class="field-error" *ngIf="codigoAgua?.invalid && codigoAgua?.touched">
+          El codigo de agua es obligatorio.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="propGas">Codigo de gas</label>
+        <input pInputText id="propGas" formControlName="codigoGas" placeholder="Ej. G883120" />
+        <small class="field-hint">Opcional.</small>
+      </div>
+    </div>
+
+    <div class="dialog-actions">
+      <p-button label="Cancelar" severity="secondary" [outlined]="true" type="button" (onClick)="cerrar()">
+      </p-button>
+      <p-button [label]="esEdicion ? 'Guardar cambios' : 'Crear propiedad'" icon="pi pi-check" type="submit"
+        [loading]="isLoading()" [disabled]="form.invalid || isLoading()"></p-button>
+    </div>
+  </form>
+</p-dialog>

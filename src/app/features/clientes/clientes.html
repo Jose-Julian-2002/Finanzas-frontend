@@ -1,0 +1,138 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Clientes</h1>
+      <p class="page-subtitle">Cartera de clientes con prestamos y contratos asociados.</p>
+    </div>
+    <p-button *ngIf="puedeCrear" label="Nuevo cliente" icon="pi pi-plus" (onClick)="abrirCrear()"></p-button>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-box">
+      <input pInputText type="text" [formControl]="controlBusqueda"
+        placeholder="Buscar por nombre o documento" aria-label="Buscar clientes" />
+      <p-button *ngIf="controlBusqueda.value" icon="pi pi-times" severity="secondary" [text]="true"
+        [rounded]="true" ariaLabel="Limpiar busqueda" (onClick)="controlBusqueda.setValue('')"></p-button>
+    </div>
+
+    <div class="toolbar-filters">
+      <label class="switch-label">
+        <p-toggleSwitch [ngModel]="soloActivos()" (ngModelChange)="onCambiarSoloActivos($event)"></p-toggleSwitch>
+        <span>Solo activos</span>
+      </label>
+    </div>
+  </div>
+
+  <p-table [value]="clientes()" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [paginator]="true"
+    [rows]="tamano()" [first]="primer()" [totalRecords]="total()" [loading]="cargando()" dataKey="id"
+    [rowsPerPageOptions]="[10, 20, 50]" currentPageReportTemplate="{first} a {last} de {totalRecords}"
+    styleClass="tabla-lista">
+
+    <ng-template #header>
+      <tr>
+        <th>Cliente</th>
+        <th>Documento</th>
+        <th>Telefono</th>
+        <th>Registro</th>
+        <th class="tabular">Prestamos</th>
+        <th class="tabular">Contratos</th>
+        <th>Estado</th>
+        <th class="col-acciones">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-cliente>
+      <tr>
+        <td class="celda-nombre">{{ cliente.nombre }}</td>
+        <td>
+          <span *ngIf="cliente.documentoIdentidad; else sinDocumento">{{ cliente.documentoIdentidad }}</span>
+          <ng-template #sinDocumento><span class="texto-inactivo">Sin documento</span></ng-template>
+        </td>
+        <td>
+          <span *ngIf="cliente.telefono; else sinTelefono">{{ cliente.telefono }}</span>
+          <ng-template #sinTelefono><span class="texto-inactivo">Sin telefono</span></ng-template>
+        </td>
+        <td>{{ cliente.fechaRegistro | date: 'dd/MM/yyyy' }}</td>
+        <td class="tabular">{{ cliente.totalPrestamos }}</td>
+        <td class="tabular">{{ cliente.totalContratos }}</td>
+        <td>
+          <label class="switch-label">
+            <p-toggleSwitch [ngModel]="cliente.estado" (ngModelChange)="onCambiarEstado(cliente, $event)"></p-toggleSwitch>
+            <span>{{ cliente.estado ? 'Activo' : 'Inactivo' }}</span>
+          </label>
+        </td>
+        <td class="col-acciones">
+          <div class="acciones">
+            <p-button *ngIf="puedeEditar" icon="pi pi-pencil" severity="secondary" [text]="true"
+              [rounded]="true" pTooltip="Editar" tooltipPosition="top" ariaLabel="Editar cliente"
+              (onClick)="abrirEditar(cliente)"></p-button>
+
+            <p-button icon="pi pi-eye" severity="secondary" [text]="true" [rounded]="true" pTooltip="Ver detalle"
+              tooltipPosition="top" ariaLabel="Ver detalle del cliente" (onClick)="abrirDetalle(cliente)"></p-button>
+
+            <p-button *ngIf="puedeEliminar && cliente.estado" icon="pi pi-ban" severity="danger"
+              [text]="true" [rounded]="true" pTooltip="Desactivar" tooltipPosition="top"
+              ariaLabel="Desactivar cliente" (onClick)="confirmarEliminar(cliente)"></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="8">
+          <div class="estado-vacio">
+            <i class="pi pi-inbox"></i>
+            <p>No se encontraron clientes.</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<app-cliente-form-dialog [visible]="formVisible()" (visibleChange)="formVisible.set($event)"
+  [cliente]="clienteEditando()" (guardado)="alGuardar()"></app-cliente-form-dialog>
+
+<p-dialog header="Detalle del cliente" [visible]="detalleVisible()" (visibleChange)="detalleVisible.set($event)"
+  [modal]="true" [style]="{ width: '32rem' }" [draggable]="false">
+  <ng-container *ngIf="detalleCargando()">
+    <div class="estado-vacio">
+      <i class="pi pi-spin pi-spinner"></i>
+      <p>Cargando cliente...</p>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!detalleCargando() && clienteDetalle() as cliente">
+    <div class="detalle-lista">
+      <div class="detalle-fila">
+        <span class="detalle-label">Nombre</span>
+        <span class="detalle-valor">{{ cliente.nombre }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Documento</span>
+        <span class="detalle-valor">{{ cliente.documentoIdentidad || 'Sin documento' }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Telefono</span>
+        <span class="detalle-valor">{{ cliente.telefono || 'Sin telefono' }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Fecha de registro</span>
+        <span class="detalle-valor">{{ cliente.fechaRegistro | date: 'dd/MM/yyyy' }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Prestamos</span>
+        <span class="detalle-valor tabular">{{ cliente.totalPrestamos }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Contratos</span>
+        <span class="detalle-valor tabular">{{ cliente.totalContratos }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Estado</span>
+        <span class="detalle-valor">{{ cliente.estado ? 'Activo' : 'Inactivo' }}</span>
+      </div>
+    </div>
+  </ng-container>
+</p-dialog>

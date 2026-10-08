@@ -1,0 +1,88 @@
+.dialog-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+}
+
+.contador {
+    font-size: var(--app-text-sm);
+    font-weight: 500;
+    color: var(--app-text-muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.permisos-buscador {
+    margin-bottom: 16px;
+}
+
+.permisos-buscador input {
+    width: 100%;
+}
+
+.permisos-cuerpo {
+    max-height: min(52vh, 460px);
+    overflow-y: auto;
+    padding-right: 6px;
+    margin-inline: -4px;
+    padding-inline: 4px;
+}
+
+.modulo {
+    margin-bottom: 20px;
+}
+
+.modulo-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: var(--app-radius-sm);
+    background-color: var(--app-surface-2);
+    margin-bottom: 4px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.modulo-header label {
+    font-weight: 700;
+    font-size: var(--app-text-sm);
+    letter-spacing: 0.01em;
+    color: var(--app-text);
+    cursor: pointer;
+}
+
+.permiso-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: var(--app-radius-sm);
+    transition: background-color var(--app-duration) var(--app-ease);
+}
+
+.permiso-item:hover {
+    background-color: var(--app-surface-2);
+}
+
+.permiso-item label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.permiso-nombre {
+    font-size: var(--app-text-base);
+    font-weight: 600;
+    color: var(--app-text);
+}
+
+.permiso-descripcion {
+    font-size: var(--app-text-xs);
+    color: var(--app-text-subtle);
+}

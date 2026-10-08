@@ -1,0 +1,126 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Usuarios</h1>
+      <p class="page-subtitle">Administra las cuentas del sistema y sus roles.</p>
+    </div>
+    <p-button *ngIf="puedeCrear" label="Nuevo usuario" icon="pi pi-user-plus" (onClick)="abrirCrear()">
+    </p-button>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-box">
+      <input pInputText type="text" [formControl]="controlBusqueda" placeholder="Buscar por nombre o Gmail"
+        aria-label="Buscar usuarios" />
+      <p-button *ngIf="controlBusqueda.value" icon="pi pi-times" severity="secondary" [text]="true"
+        [rounded]="true" aria-label="Limpiar búsqueda" (onClick)="limpiarBusqueda()"></p-button>
+    </div>
+
+    <div class="toolbar-filters">
+      <label for="soloActivos" class="switch-label">
+        <p-toggleswitch id="soloActivos" [ngModel]="soloActivos()"
+          (ngModelChange)="onCambiarSoloActivos($event)"></p-toggleswitch>
+        <span>Solo activos</span>
+      </label>
+
+      <p-select [options]="roles()" optionLabel="nombre" optionValue="id" [ngModel]="rolIdFiltro()"
+        (ngModelChange)="onCambiarRol($event)" placeholder="Todos los roles" [showClear]="true"
+        [style]="{ width: '190px' }"></p-select>
+    </div>
+  </div>
+
+  <p-table [value]="usuarios()" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [paginator]="true"
+    [rows]="tamano()" [first]="primer()" [totalRecords]="total()" [loading]="cargando()" [rowsPerPageOptions]="[10, 20, 50, 100]"
+    [showCurrentPageReport]="true" currentPageReportTemplate="{first} - {last} de {totalRecords} usuarios"
+    [showLoader]="true" dataKey="id" styleClass="usuarios-table">
+
+    <ng-template #header>
+      <tr>
+        <th>Nombre</th>
+        <th>Gmail</th>
+        <th>Rol</th>
+        <th>Estado</th>
+        <th class="col-acciones">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-usuario>
+      <tr>
+        <td class="celda-nombre">{{ usuario.nombre }}</td>
+        <td>{{ usuario.gmail }}</td>
+        <td>
+          <p-tag [value]="usuario.rol" [severity]="severityRol(usuario.rol)" />
+        </td>
+        <td>
+          <div class="celda-estado">
+            <p-toggleswitch [ngModel]="usuario.estado" (onChange)="onCambiarEstado(usuario, $event.checked)"
+              [disabled]="!puedeEditar" [attr.aria-label]="'Cambiar estado de ' + usuario.nombre"></p-toggleswitch>
+            <span [class.texto-inactivo]="!usuario.estado">
+              {{ usuario.estado ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+        </td>
+        <td class="col-acciones">
+          <div class="acciones">
+            <p-button *ngIf="puedeEditar" icon="pi pi-pencil" severity="secondary" [text]="true" [rounded]="true"
+              pTooltip="Editar" tooltipPosition="top" ariaLabel="Editar usuario"
+              (onClick)="abrirEditar(usuario)"></p-button>
+
+            <p-button *ngIf="puedeGestionarRoles" icon="pi pi-shield" severity="secondary" [text]="true"
+              [rounded]="true" pTooltip="Cambiar rol" tooltipPosition="top" ariaLabel="Cambiar rol"
+              (onClick)="abrirCambioRol(usuario)"></p-button>
+
+            <p-button *ngIf="puedeEditar" icon="pi pi-key" severity="secondary" [text]="true" [rounded]="true"
+              pTooltip="Cambiar contraseña" tooltipPosition="top" ariaLabel="Cambiar contraseña"
+              (onClick)="abrirCambioPassword(usuario)"></p-button>
+
+            <p-button *ngIf="puedeEditar" icon="pi pi-ban" severity="danger" [text]="true" [rounded]="true"
+              pTooltip="Desactivar" tooltipPosition="top" ariaLabel="Desactivar usuario"
+              (onClick)="confirmarEliminar(usuario)"></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="5">
+          <div class="estado-vacio">
+            <i class="pi pi-inbox"></i>
+            <p>No se encontraron usuarios con los filtros aplicados.</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<app-usuario-form-dialog [visible]="formVisible()" (visibleChange)="formVisible.set($event)"
+  [usuario]="usuarioEditando()" [roles]="roles()" (guardado)="alGuardar()"></app-usuario-form-dialog>
+
+<p-dialog [visible]="rolVisible()" (visibleChange)="rolVisible.set($event)" header="Cambiar rol" [modal]="true"
+  [style]="{ width: '400px' }" [draggable]="false" [blockScroll]="true">
+  <div class="dialog-form">
+    <p>
+      Rol actual de <strong>{{ usuarioRol()?.nombre }}</strong>:
+      <strong>{{ usuarioRol()?.rol }}</strong>
+    </p>
+
+    <div class="field">
+      <label for="nuevoRol">Nuevo rol</label>
+      <p-select id="nuevoRol" [options]="roles()" optionLabel="nombre" optionValue="id"
+        [ngModel]="nuevoRolId()" (ngModelChange)="nuevoRolId.set($event)" appendTo="body"
+        styleClass="w-full"></p-select>
+    </div>
+
+    <div class="dialog-actions">
+      <p-button label="Cancelar" severity="secondary" [outlined]="true"
+        (onClick)="rolVisible.set(false)"></p-button>
+      <p-button label="Cambiar rol" icon="pi pi-check" (onClick)="confirmarCambioRol()"
+        [disabled]="nuevoRolId() === null"></p-button>
+    </div>
+  </div>
+</p-dialog>
+
+<app-cambiar-password-dialog [visible]="passwordVisible()" (visibleChange)="passwordVisible.set($event)"
+  [usuarioId]="passwordUsuarioId() ?? 0" titulo="Cambiar contraseña"></app-cambiar-password-dialog>
