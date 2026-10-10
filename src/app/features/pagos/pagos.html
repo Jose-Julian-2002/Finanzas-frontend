@@ -1,0 +1,121 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Pagos</h1>
+      <p class="page-subtitle">Recibos que aplican montos a prestamos o contratos de los clientes.</p>
+    </div>
+    <p-button *ngIf="puedeCrear" label="Nuevo recibo" icon="pi pi-plus" (onClick)="abrirCrear()"></p-button>
+  </div>
+
+  <div class="toolbar">
+    <div class="toolbar-filters">
+      <p-select [ngModel]="filtroMetodoId()" (ngModelChange)="onFiltroMetodo($event)"
+        [options]="metodos()" optionLabel="nombre" optionValue="id" placeholder="Metodo de pago" [showClear]="true"
+        styleClass="filtro-select" aria-label="Filtrar por metodo de pago"></p-select>
+
+      <p-select [ngModel]="filtroClienteId()" (ngModelChange)="onFiltroCliente($event)"
+        [options]="clientes()" optionLabel="nombre" optionValue="id" placeholder="Cliente" [showClear]="true"
+        [filter]="true" filterBy="nombre" styleClass="filtro-select" aria-label="Filtrar por cliente"></p-select>
+    </div>
+  </div>
+
+  <p-table [value]="pagos()" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [paginator]="true"
+    [rows]="tamano()" [first]="primer()" [totalRecords]="total()" [loading]="cargando()" dataKey="id"
+    [rowsPerPageOptions]="[10, 20, 50]" currentPageReportTemplate="{first} a {last} de {totalRecords}"
+    styleClass="tabla-lista">
+
+    <ng-template #header>
+      <tr>
+        <th>Fecha</th>
+        <th>Metodo de pago</th>
+        <th>Aplicaciones</th>
+        <th class="tabular">Monto total</th>
+        <th>Registrado por</th>
+        <th class="col-acciones">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-pago>
+      <tr>
+        <td class="tabular">{{ pago.fecha | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ pago.metodoPago }}</td>
+        <td class="tabular">{{ pago.totalDetalles }}</td>
+        <td class="tabular moneda">{{ formatearMonto(pago.montoTotal) }}</td>
+        <td class="celda-nombre">{{ pago.usuario }}</td>
+        <td class="col-acciones">
+          <div class="acciones">
+            <p-button icon="pi pi-eye" severity="secondary" [text]="true" [rounded]="true" pTooltip="Ver recibo"
+              tooltipPosition="top" ariaLabel="Ver recibo" (onClick)="abrirDetalle(pago)"></p-button>
+
+            <p-button *ngIf="puedeEliminar" icon="pi pi-ban" severity="danger" [text]="true" [rounded]="true"
+              pTooltip="Anular recibo" tooltipPosition="top" ariaLabel="Anular recibo"
+              (onClick)="confirmarEliminar(pago)"></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="6">
+          <div class="estado-vacio">
+            <i class="pi pi-inbox"></i>
+            <p>No se encontraron pagos.</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<app-pago-form-dialog [visible]="formVisible()" (visibleChange)="formVisible.set($event)"
+  (guardado)="alGuardar()"></app-pago-form-dialog>
+
+<p-dialog header="Recibo de pago" [visible]="detalleVisible()" (visibleChange)="detalleVisible.set($event)"
+  [modal]="true" [style]="{ width: '42rem' }" [draggable]="false">
+  <ng-container *ngIf="detalleCargando()">
+    <div class="estado-vacio">
+      <i class="pi pi-spin pi-spinner"></i>
+      <p>Cargando recibo...</p>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!detalleCargando() && detalle() as d">
+    <div class="detalle-lista">
+      <div class="detalle-fila">
+        <span class="detalle-label">Fecha</span>
+        <span class="detalle-valor">{{ d.pago.fecha | date: 'dd/MM/yyyy' }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Metodo de pago</span>
+        <span class="detalle-valor">{{ d.pago.metodoPago }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Registrado por</span>
+        <span class="detalle-valor">{{ d.pago.usuario }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Monto total</span>
+        <span class="detalle-valor tabular moneda">{{ formatearMonto(d.pago.montoTotal) }}</span>
+      </div>
+    </div>
+
+    <h3 class="detalle-seccion">Aplicaciones</h3>
+    <table class="detalles-tabla">
+      <thead>
+        <tr>
+          <th>Aplicado a</th>
+          <th class="tabular">Monto</th>
+          <th>Fecha de pago</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let detalle of d.detalles">
+          <td>{{ detalle.referencia }}</td>
+          <td class="tabular moneda">{{ formatearMonto(detalle.montoAplicado) }}</td>
+          <td>{{ detalle.fechaPago | date: 'dd/MM/yyyy' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </ng-container>
+</p-dialog>

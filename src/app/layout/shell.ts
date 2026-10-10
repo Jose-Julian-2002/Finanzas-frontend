@@ -55,6 +55,14 @@ export class ShellComponent {
     return this.authService.hasPermission('Prestamos.Ver');
   }
 
+  get puedeVerMetodosPago(): boolean {
+    return this.authService.hasPermission('MetodosPago.Ver');
+  }
+
+  get puedeVerPagos(): boolean {
+    return this.authService.hasPermission('Pagos.Ver');
+  }
+
   get puedeVerContratos(): boolean {
     return this.authService.hasPermission('Contratos.Ver');
   }

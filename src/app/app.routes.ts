@@ -26,6 +26,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/prestamos/prestamos').then((m) => m.PrestamosComponent)
       },
       {
+        path: 'pagos',
+        canActivate: [permissionGuard('Pagos.Ver')],
+        loadComponent: () => import('./features/pagos/pagos').then((m) => m.PagosComponent)
+      },
+      {
         path: 'contratos',
         canActivate: [permissionGuard('Contratos.Ver')],
         loadComponent: () => import('./features/contratos/contratos').then((m) => m.ContratosComponent)
@@ -43,6 +48,12 @@ export const routes: Routes = [
           import('./features/tipos-propiedad/tipos-propiedad').then(
             (m) => m.TiposPropiedadComponent
           )
+      },
+      {
+        path: 'metodos-pago',
+        canActivate: [permissionGuard('MetodosPago.Ver')],
+        loadComponent: () =>
+          import('./features/metodos-pago/metodos-pago').then((m) => m.MetodosPagoComponent)
       },
       {
         path: 'usuarios',

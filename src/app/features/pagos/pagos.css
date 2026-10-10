@@ -1,0 +1,95 @@
+.celda-nombre {
+    font-weight: 600;
+    color: var(--app-text);
+}
+
+.col-acciones {
+    width: 92px;
+}
+
+.moneda {
+    white-space: nowrap;
+}
+
+:host ::ng-deep .filtro-select {
+    min-width: 190px;
+}
+
+@media (max-width: 640px) {
+    .toolbar-filters {
+        width: 100%;
+    }
+
+    :host ::ng-deep .filtro-select {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+.detalle-lista {
+    display: flex;
+    flex-direction: column;
+}
+
+.detalle-fila {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 11px 2px;
+}
+
+.detalle-fila + .detalle-fila {
+    border-top: 1px solid var(--app-border-subtle);
+}
+
+.detalle-label {
+    font-size: var(--app-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--app-text-subtle);
+}
+
+.detalle-valor {
+    font-weight: 600;
+    color: var(--app-text);
+    text-align: right;
+    word-break: break-word;
+}
+
+.detalle-seccion {
+    margin: 24px 0 10px;
+    font-size: var(--app-text-md);
+    letter-spacing: -0.015em;
+}
+
+.detalles-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--app-text-sm);
+}
+
+.detalles-tabla th {
+    text-align: left;
+    font-size: var(--app-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--app-text-subtle);
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--app-border);
+}
+
+.detalles-tabla td {
+    padding: 7px 6px;
+    border-bottom: 1px solid var(--app-border-subtle);
+    color: var(--app-text);
+}
+
+.detalles-tabla tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.detalles-tabla .tabular {
+    text-align: right;
+    white-space: nowrap;
+}

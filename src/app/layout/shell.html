@@ -67,6 +67,9 @@
     <a routerLink="/prestamos" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerPrestamos" (click)="drawerVisible.set(false)">
       <i class="pi pi-dollar" aria-hidden="true"></i><span>Prestamos</span>
     </a>
+    <a routerLink="/pagos" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerPagos" (click)="drawerVisible.set(false)">
+      <i class="pi pi-money-bill" aria-hidden="true"></i><span>Pagos</span>
+    </a>
     <a routerLink="/contratos" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerContratos" (click)="drawerVisible.set(false)">
       <i class="pi pi-file-signature" aria-hidden="true"></i><span>Contratos</span>
     </a>
@@ -75,6 +78,9 @@
     </a>
     <a routerLink="/tipos-propiedad" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerTiposPropiedad" (click)="drawerVisible.set(false)">
       <i class="pi pi-tags" aria-hidden="true"></i><span>Tipos de propiedad</span>
+    </a>
+    <a routerLink="/metodos-pago" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerMetodosPago" (click)="drawerVisible.set(false)">
+      <i class="pi pi-credit-card" aria-hidden="true"></i><span>Metodos de pago</span>
     </a>
     <section class="nav-section" *ngIf="puedeVerUsuarios || puedeVerRoles" aria-label="Administración">
       <h2 class="nav-section-title">Administración</h2>

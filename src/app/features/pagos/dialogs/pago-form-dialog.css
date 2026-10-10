@@ -1,0 +1,96 @@
+.form-grid.encabezado {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 4px;
+}
+
+:host ::ng-deep .p-datepicker,
+:host ::ng-deep .p-inputnumber {
+    width: 100%;
+}
+
+.aplicaciones {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--app-border-subtle);
+}
+
+.aplicaciones-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.aplicaciones-head h3 {
+    margin: 0;
+    font-size: var(--app-text-md);
+    letter-spacing: -0.015em;
+}
+
+.fila-pago {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 140px 170px 40px;
+    gap: 10px;
+    align-items: start;
+    padding: 12px;
+    border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-md, 8px);
+    margin-bottom: 10px;
+    background: var(--app-surface-muted, transparent);
+}
+
+.fila-pago.fila-error {
+    border-color: var(--app-danger);
+}
+
+.fila-celda {
+    min-width: 0;
+}
+
+.fila-celda.quitar {
+    padding-top: 4px;
+}
+
+:host ::ng-deep .destino-select,
+:host ::ng-deep .monto-input {
+    width: 100%;
+}
+
+.sin-filas {
+    color: var(--app-text-muted);
+    font-size: var(--app-text-sm);
+    margin: 4px 0 0;
+}
+
+.total-recibo {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 2px 4px;
+    font-size: var(--app-text-base);
+    color: var(--app-text);
+}
+
+.total-recibo strong {
+    font-size: var(--app-text-lg);
+    font-weight: 700;
+}
+
+@media (max-width: 640px) {
+    .form-grid.encabezado {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .fila-pago {
+        grid-template-columns: minmax(0, 1fr) 110px 40px;
+    }
+
+    .fila-pago .fila-celda.fecha {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+}

@@ -1,0 +1,24 @@
+<p-dialog [visible]="visible" (visibleChange)="visibleChange.emit($event)" [modal]="true" [header]="titulo"
+  [style]="{ width: '440px' }" [draggable]="false" [blockScroll]="true">
+
+  <p-message severity="error" [text]="errorMessage()" *ngIf="errorMessage()"
+    [style]="{ 'margin-bottom': '16px', 'display': 'block' }"></p-message>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="dialog-form">
+    <div class="field">
+      <label for="metodoNombre">Metodo de pago</label>
+      <input pInputText id="metodoNombre" formControlName="nombre" placeholder="Ej. Efectivo, Transferencia, Tarjeta" />
+      <small class="field-error" *ngIf="nombre?.invalid && nombre?.touched">
+        Ingrese un nombre de al menos 2 caracteres.
+      </small>
+      <small class="field-hint">El nombre debe ser unico; no se repite con otro metodo.</small>
+    </div>
+
+    <div class="dialog-actions">
+      <p-button label="Cancelar" severity="secondary" [outlined]="true" type="button" (onClick)="cerrar()">
+      </p-button>
+      <p-button [label]="esEdicion ? 'Guardar cambios' : 'Crear metodo'" icon="pi pi-check" type="submit"
+        [loading]="isLoading()" [disabled]="form.invalid || isLoading()"></p-button>
+    </div>
+  </form>
+</p-dialog>
