@@ -1,0 +1,172 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Prestamos</h1>
+      <p class="page-subtitle">Prestamos activos con su cuota fija mensual, abonos registrados y saldo pendiente.</p>
+    </div>
+    <p-button *ngIf="puedeCrear" label="Nuevo prestamo" icon="pi pi-plus" (onClick)="abrirCrear()"></p-button>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-box">
+      <input pInputText type="text" [formControl]="controlBusqueda"
+        placeholder="Buscar por cliente" aria-label="Buscar prestamos" />
+      <p-button *ngIf="controlBusqueda.value" icon="pi pi-times" severity="secondary" [text]="true"
+        [rounded]="true" ariaLabel="Limpiar busqueda" (onClick)="controlBusqueda.setValue('')"></p-button>
+    </div>
+
+    <div class="toolbar-filters">
+      <p-select [ngModel]="filtroClienteId()" (ngModelChange)="onFiltroCliente($event)"
+        [options]="clientes()" optionLabel="nombre" optionValue="id" placeholder="Cliente"
+        [showClear]="true" styleClass="filtro-select" aria-label="Filtrar por cliente"></p-select>
+
+      <label class="switch-label">
+        <p-toggleSwitch [ngModel]="soloActivos()" (ngModelChange)="onCambiarSoloActivos($event)"></p-toggleSwitch>
+        <span>Solo activos</span>
+      </label>
+    </div>
+  </div>
+
+  <p-table [value]="prestamos()" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [paginator]="true"
+    [rows]="tamano()" [first]="primer()" [totalRecords]="total()" [loading]="cargando()" dataKey="id"
+    [rowsPerPageOptions]="[10, 20, 50]" currentPageReportTemplate="{first} a {last} de {totalRecords}"
+    styleClass="tabla-lista">
+
+    <ng-template #header>
+      <tr>
+        <th>Cliente</th>
+        <th class="tabular">Capital</th>
+        <th class="tabular">Interes</th>
+        <th class="tabular">Cuotas</th>
+        <th class="tabular">Cuota mensual</th>
+        <th class="tabular">Abonado</th>
+        <th class="tabular">Saldo</th>
+        <th>Estado</th>
+        <th class="col-acciones">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-prestamo>
+      <tr>
+        <td class="celda-nombre">{{ prestamo.cliente }}</td>
+        <td class="tabular moneda">{{ formatearMonto(prestamo.montoCapital) }}</td>
+        <td class="tabular">{{ prestamo.interes }}%</td>
+        <td class="tabular">{{ prestamo.totalCuotas }}</td>
+        <td class="tabular moneda">{{ formatearMonto(prestamo.cuotaMensual) }}</td>
+        <td class="tabular moneda">{{ formatearMonto(prestamo.totalAbonado) }}</td>
+        <td class="tabular moneda">
+          <span [class.texto-pendiente]="prestamo.saldoPendiente > 0">{{ formatearMonto(prestamo.saldoPendiente) }}</span>
+        </td>
+        <td>
+          <label class="switch-label">
+            <p-toggleSwitch [ngModel]="prestamo.estado" (ngModelChange)="onCambiarEstado(prestamo, $event)"></p-toggleSwitch>
+            <span>{{ prestamo.estado ? 'Activo' : 'Inactivo' }}</span>
+          </label>
+        </td>
+        <td class="col-acciones">
+          <div class="acciones">
+            <p-button *ngIf="puedeEditar" icon="pi pi-pencil" severity="secondary" [text]="true"
+              [rounded]="true" pTooltip="Editar" tooltipPosition="top" ariaLabel="Editar prestamo"
+              (onClick)="abrirEditar(prestamo)"></p-button>
+
+            <p-button icon="pi pi-eye" severity="secondary" [text]="true" [rounded]="true" pTooltip="Ver detalle"
+              tooltipPosition="top" ariaLabel="Ver detalle del prestamo" (onClick)="abrirDetalle(prestamo)"></p-button>
+
+            <p-button *ngIf="puedeEliminar && prestamo.estado" icon="pi pi-ban" severity="danger"
+              [text]="true" [rounded]="true" pTooltip="Desactivar" tooltipPosition="top"
+              ariaLabel="Desactivar prestamo" (onClick)="confirmarEliminar(prestamo)"></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="9">
+          <div class="estado-vacio">
+            <i class="pi pi-inbox"></i>
+            <p>No se encontraron prestamos.</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<app-prestamo-form-dialog [visible]="formVisible()" (visibleChange)="formVisible.set($event)"
+  [prestamo]="prestamoEditando()" (guardado)="alGuardar()"></app-prestamo-form-dialog>
+
+<p-dialog header="Detalle del prestamo" [visible]="detalleVisible()" (visibleChange)="detalleVisible.set($event)"
+  [modal]="true" [style]="{ width: '38rem' }" [draggable]="false">
+  <ng-container *ngIf="detalleCargando()">
+    <div class="estado-vacio">
+      <i class="pi pi-spin pi-spinner"></i>
+      <p>Cargando prestamo...</p>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!detalleCargando() && detalle() as d">
+    <div class="detalle-lista">
+      <div class="detalle-fila">
+        <span class="detalle-label">Cliente</span>
+        <span class="detalle-valor">{{ d.prestamo.cliente }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Capital</span>
+        <span class="detalle-valor tabular">{{ formatearMonto(d.prestamo.montoCapital) }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Interes mensual</span>
+        <span class="detalle-valor tabular">{{ d.prestamo.interes }}%</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Cuotas</span>
+        <span class="detalle-valor tabular">{{ d.prestamo.totalCuotas }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Fecha de inicio</span>
+        <span class="detalle-valor">{{ d.prestamo.fechaInicio | date: 'dd/MM/yyyy' }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Cuota mensual</span>
+        <span class="detalle-valor tabular">{{ formatearMonto(d.prestamo.cuotaMensual) }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Total intereses</span>
+        <span class="detalle-valor tabular">{{ formatearMonto(d.prestamo.totalIntereses) }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Total a pagar</span>
+        <span class="detalle-valor tabular">{{ formatearMonto(d.prestamo.totalPagar) }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Total abonado</span>
+        <span class="detalle-valor tabular">{{ formatearMonto(d.prestamo.totalAbonado) }}</span>
+      </div>
+      <div class="detalle-fila">
+        <span class="detalle-label">Saldo pendiente</span>
+        <span class="detalle-valor tabular">{{ formatearMonto(d.prestamo.saldoPendiente) }}</span>
+      </div>
+    </div>
+
+    <h3 class="cuotas-titulo">Plan de cuotas</h3>
+    <table class="cuotas-tabla">
+      <thead>
+        <tr>
+          <th>Nº</th>
+          <th class="tabular">Capital</th>
+          <th class="tabular">Interes</th>
+          <th class="tabular">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cuota of d.cuotas">
+          <td class="tabular">{{ cuota.numero }}</td>
+          <td class="tabular moneda">{{ formatearMonto(cuota.abonoCapital) }}</td>
+          <td class="tabular moneda">{{ formatearMonto(cuota.interes) }}</td>
+          <td class="tabular moneda">{{ formatearMonto(cuota.total) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </ng-container>
+</p-dialog>

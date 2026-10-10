@@ -1,4 +1,4 @@
-<div class="app-shell">
+﻿<div class="app-shell">
   <header class="topbar">
     <div class="topbar-inner">
       <button type="button" class="menu-btn" (click)="drawerVisible.set(true)"
@@ -10,29 +10,6 @@
         <span class="brand-logo"><i class="pi pi-wallet"></i></span>
         <span class="brand-name">Finanzas Manager</span>
       </a>
-
-      <nav class="nav-links" aria-label="Secciones">
-        <a routerLink="/clientes" routerLinkActive="active" *ngIf="puedeVerClientes">
-          <i class="pi pi-users"></i>
-          <span>Clientes</span>
-        </a>
-        <a routerLink="/propiedades" routerLinkActive="active" *ngIf="puedeVerPropiedades">
-          <i class="pi pi-building"></i>
-          <span>Propiedades</span>
-        </a>
-        <a routerLink="/tipos-propiedad" routerLinkActive="active" *ngIf="puedeVerTiposPropiedad">
-          <i class="pi pi-tags"></i>
-          <span>Tipos</span>
-        </a>
-        <a routerLink="/usuarios" routerLinkActive="active" *ngIf="puedeVerUsuarios">
-          <i class="pi pi-id-card"></i>
-          <span>Usuarios</span>
-        </a>
-        <a routerLink="/roles" routerLinkActive="active" *ngIf="puedeVerRoles">
-          <i class="pi pi-shield"></i>
-          <span>Roles</span>
-        </a>
-      </nav>
 
       <div class="user-area">
         <p-button label="Salir" icon="pi pi-sign-out" severity="secondary" [outlined]="true"
@@ -54,6 +31,10 @@
     </div>
   </header>
 
+  <aside class="sidebar" aria-label="Menú principal">
+    <ng-container *ngTemplateOutlet="navigation"></ng-container>
+  </aside>
+
   <main class="app-content">
     <router-outlet></router-outlet>
   </main>
@@ -68,32 +49,7 @@
     </div>
   </ng-template>
 
-  <nav class="drawer-links" aria-label="Secciones">
-    <a routerLink="/clientes" routerLinkActive="active" *ngIf="puedeVerClientes"
-      (click)="drawerVisible.set(false)">
-      <i class="pi pi-users"></i>
-      <span>Clientes</span>
-    </a>
-    <a routerLink="/propiedades" routerLinkActive="active" *ngIf="puedeVerPropiedades"
-      (click)="drawerVisible.set(false)">
-      <i class="pi pi-building"></i>
-      <span>Propiedades</span>
-    </a>
-    <a routerLink="/tipos-propiedad" routerLinkActive="active" *ngIf="puedeVerTiposPropiedad"
-      (click)="drawerVisible.set(false)">
-      <i class="pi pi-tags"></i>
-      <span>Tipos de propiedad</span>
-    </a>
-    <a routerLink="/usuarios" routerLinkActive="active" *ngIf="puedeVerUsuarios"
-      (click)="drawerVisible.set(false)">
-      <i class="pi pi-id-card"></i>
-      <span>Usuarios</span>
-    </a>
-    <a routerLink="/roles" routerLinkActive="active" *ngIf="puedeVerRoles" (click)="drawerVisible.set(false)">
-      <i class="pi pi-shield"></i>
-      <span>Roles</span>
-    </a>
-  </nav>
+  <ng-container *ngTemplateOutlet="navigation"></ng-container>
 
   <ng-template #footer>
     <div class="drawer-footer">
@@ -102,6 +58,35 @@
     </div>
   </ng-template>
 </p-drawer>
+
+<ng-template #navigation>
+  <nav class="drawer-links" aria-label="Secciones">
+    <a routerLink="/clientes" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerClientes" (click)="drawerVisible.set(false)">
+      <i class="pi pi-users" aria-hidden="true"></i><span>Clientes</span>
+    </a>
+    <a routerLink="/prestamos" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerPrestamos" (click)="drawerVisible.set(false)">
+      <i class="pi pi-dollar" aria-hidden="true"></i><span>Prestamos</span>
+    </a>
+    <a routerLink="/contratos" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerContratos" (click)="drawerVisible.set(false)">
+      <i class="pi pi-file-signature" aria-hidden="true"></i><span>Contratos</span>
+    </a>
+    <a routerLink="/propiedades" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerPropiedades" (click)="drawerVisible.set(false)">
+      <i class="pi pi-building" aria-hidden="true"></i><span>Propiedades</span>
+    </a>
+    <a routerLink="/tipos-propiedad" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerTiposPropiedad" (click)="drawerVisible.set(false)">
+      <i class="pi pi-tags" aria-hidden="true"></i><span>Tipos de propiedad</span>
+    </a>
+    <section class="nav-section" *ngIf="puedeVerUsuarios || puedeVerRoles" aria-label="Administración">
+      <h2 class="nav-section-title">Administración</h2>
+      <a routerLink="/usuarios" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerUsuarios" (click)="drawerVisible.set(false)">
+        <i class="pi pi-id-card" aria-hidden="true"></i><span>Usuarios</span>
+      </a>
+      <a routerLink="/roles" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerRoles" (click)="drawerVisible.set(false)">
+        <i class="pi pi-shield" aria-hidden="true"></i><span>Roles</span>
+      </a>
+    </section>
+  </nav>
+</ng-template>
 
 <p-toast position="bottom-right"></p-toast>
 <p-confirmdialog></p-confirmdialog>

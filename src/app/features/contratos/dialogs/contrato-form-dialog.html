@@ -1,0 +1,88 @@
+<p-dialog [visible]="visible" (visibleChange)="visibleChange.emit($event)" [modal]="true" [header]="titulo"
+  [style]="{ width: '580px' }" [draggable]="false" [blockScroll]="true">
+
+  <p-message severity="error" [text]="errorMessage()" *ngIf="errorMessage()"
+    [style]="{ 'margin-bottom': '16px', 'display': 'block' }"></p-message>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="dialog-form">
+    <div class="field">
+      <label for="conCliente">Inquilino</label>
+      <p-select inputId="conCliente" formControlName="clienteId" [options]="clientes()" optionLabel="nombre"
+        optionValue="id" placeholder="Seleccione el cliente" [filter]="true" filterBy="nombre"
+        appendTo="body"></p-select>
+      <small class="field-error" *ngIf="clienteId.invalid && clienteId.touched">
+        Seleccione el inquilino del contrato.
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="conPropiedad">Propiedad</label>
+      <p-select inputId="conPropiedad" formControlName="propiedadId" [options]="propiedades()"
+        optionLabel="nombre" optionValue="id" placeholder="Seleccione la propiedad" [filter]="true"
+        filterBy="nombre" appendTo="body"></p-select>
+      <small class="field-error" *ngIf="propiedadId.invalid && propiedadId.touched">
+        Seleccione la propiedad arrendada.
+      </small>
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="conAlquiler">Alquiler mensual</label>
+        <p-inputnumber inputId="conAlquiler" formControlName="montoAlquiler" mode="currency" currency="COP"
+          locale="es-CO" [min]="0" placeholder="0"></p-inputnumber>
+        <small class="field-error" *ngIf="montoAlquiler.invalid && montoAlquiler.touched">
+          Ingrese un monto mayor que cero.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="conGarantia">Garantia</label>
+        <p-inputnumber inputId="conGarantia" formControlName="montoGarantia" mode="currency" currency="COP"
+          locale="es-CO" [min]="0" placeholder="0"></p-inputnumber>
+        <small class="field-error" *ngIf="montoGarantia.invalid && montoGarantia.touched">
+          Ingrese un monto mayor que cero.
+        </small>
+      </div>
+    </div>
+
+    <div class="form-grid form-grid-3">
+      <div class="field">
+        <label for="conPago">Fecha de pago</label>
+        <p-datepicker inputId="conPago" formControlName="diaPago" dateFormat="dd/mm/yy" [showIcon]="true"
+          appendTo="body" placeholder="dd/mm/aaaa"></p-datepicker>
+        <small class="field-error" *ngIf="diaPago.invalid && diaPago.touched">
+          Indique la fecha de pago.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="conInicio">Inicio</label>
+        <p-datepicker inputId="conInicio" formControlName="fechaInicio" dateFormat="dd/mm/yy" [showIcon]="true"
+          appendTo="body" placeholder="dd/mm/aaaa"></p-datepicker>
+        <small class="field-error" *ngIf="fechaInicio.invalid && fechaInicio.touched">
+          Indique la fecha de inicio.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="conFin">Fin</label>
+        <p-datepicker inputId="conFin" formControlName="fechaFin" dateFormat="dd/mm/yy" [showIcon]="true"
+          appendTo="body" placeholder="dd/mm/aaaa"></p-datepicker>
+        <small class="field-error" *ngIf="fechaFin.invalid && fechaFin.touched">
+          Indique la fecha de fin.
+        </small>
+      </div>
+    </div>
+
+    <small class="field-error" *ngIf="form.errors?.['vigenciaInvalida']">
+      La fecha de inicio no puede ser posterior a la fecha de fin.
+    </small>
+
+    <div class="dialog-actions">
+      <p-button label="Cancelar" severity="secondary" [outlined]="true" type="button" (onClick)="cerrar()">
+      </p-button>
+      <p-button [label]="esEdicion ? 'Guardar cambios' : 'Crear contrato'" icon="pi pi-check" type="submit"
+        [loading]="isLoading()" [disabled]="form.invalid || isLoading()"></p-button>
+    </div>
+  </form>
+</p-dialog>

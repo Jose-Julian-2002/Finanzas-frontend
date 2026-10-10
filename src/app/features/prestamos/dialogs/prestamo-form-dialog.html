@@ -1,0 +1,64 @@
+<p-dialog [visible]="visible" (visibleChange)="visibleChange.emit($event)" [modal]="true" [header]="titulo"
+  [style]="{ width: '560px' }" [draggable]="false" [blockScroll]="true">
+
+  <p-message severity="error" [text]="errorMessage()" *ngIf="errorMessage()"
+    [style]="{ 'margin-bottom': '16px', 'display': 'block' }"></p-message>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="dialog-form">
+    <div class="field">
+      <label for="preCliente">Cliente</label>
+      <p-select inputId="preCliente" formControlName="clienteId" [options]="clientes()" optionLabel="nombre"
+        optionValue="id" placeholder="Seleccione el cliente" [filter]="true" filterBy="nombre"
+        appendTo="body"></p-select>
+      <small class="field-error" *ngIf="clienteId.invalid && clienteId.touched">
+        Seleccione el cliente del prestamo.
+      </small>
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="preCapital">Monto del capital</label>
+        <p-inputnumber inputId="preCapital" formControlName="montoCapital" mode="currency" currency="COP"
+          locale="es-CO" [min]="0" placeholder="0"></p-inputnumber>
+        <small class="field-error" *ngIf="montoCapital.invalid && montoCapital.touched">
+          Ingrese un capital mayor que cero.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="preInteres">Interes mensual</label>
+        <p-inputnumber inputId="preInteres" formControlName="interes" mode="decimal" suffix=" %"
+          [min]="0" [minFractionDigits]="0" [maxFractionDigits]="2"></p-inputnumber>
+        <small class="field-error" *ngIf="interes.invalid && interes.touched">
+          Ingrese un interes mayor que cero.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="preCuotas">Cantidad de cuotas</label>
+        <p-inputnumber inputId="preCuotas" formControlName="totalCuotas" mode="decimal" [min]="1"
+          [minFractionDigits]="0" [maxFractionDigits]="0" [step]="1" placeholder="0"></p-inputnumber>
+        <small class="field-error" *ngIf="totalCuotas.invalid && totalCuotas.touched">
+          Ingrese cuantas cuotas mensuales (numero entero).
+        </small>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="preInicio">Fecha de inicio</label>
+      <p-datepicker inputId="preInicio" formControlName="fechaInicio" dateFormat="dd/mm/yy" [showIcon]="true"
+        appendTo="body" placeholder="dd/mm/aaaa"></p-datepicker>
+      <small class="field-error" *ngIf="fechaInicio.invalid && fechaInicio.touched">
+        Indique la fecha de inicio.
+      </small>
+      <small class="field-hint">Desde esta fecha se generan las cuotas mensuales.</small>
+    </div>
+
+    <div class="dialog-actions">
+      <p-button label="Cancelar" severity="secondary" [outlined]="true" type="button" (onClick)="cerrar()">
+      </p-button>
+      <p-button [label]="esEdicion ? 'Guardar cambios' : 'Crear prestamo'" icon="pi pi-check" type="submit"
+        [loading]="isLoading()" [disabled]="form.invalid || isLoading()"></p-button>
+    </div>
+  </form>
+</p-dialog>

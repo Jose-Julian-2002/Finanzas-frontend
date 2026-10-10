@@ -1,0 +1,79 @@
+.celda-nombre {
+    font-weight: 600;
+    color: var(--app-text);
+    white-space: nowrap;
+}
+
+.celda-propiedad {
+    color: var(--app-text-muted);
+}
+
+.col-acciones {
+    width: 108px;
+}
+
+.moneda {
+    white-space: nowrap;
+}
+
+/* La columna de estado ya trae su propio switch: no lo hacemos encogible. */
+td .switch-label {
+    white-space: nowrap;
+}
+
+/* Selects de filtro con ancho propio para no empujar el resto de la toolbar. */
+:host ::ng-deep .filtro-select {
+    min-width: 160px;
+}
+
+.detalle-lista {
+    display: flex;
+    flex-direction: column;
+}
+
+.detalle-fila {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 11px 2px;
+}
+
+.detalle-fila + .detalle-fila {
+    border-top: 1px solid var(--app-border-subtle);
+}
+
+.detalle-label {
+    font-size: var(--app-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--app-text-subtle);
+}
+
+.detalle-valor {
+    font-weight: 600;
+    color: var(--app-text);
+    text-align: right;
+    word-break: break-word;
+}
+
+.switch-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: var(--app-text-base);
+    color: var(--app-text-muted);
+    cursor: pointer;
+    user-select: none;
+}
+
+@media (max-width: 720px) {
+    .toolbar-filters {
+        width: 100%;
+    }
+
+    :host ::ng-deep .filtro-select {
+        flex: 1;
+        min-width: 0;
+    }
+}

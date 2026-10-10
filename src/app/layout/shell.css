@@ -1,13 +1,15 @@
-.app-shell {
+﻿.app-shell {
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
     background-color: var(--app-bg);
 }
 
 /* ---- Topbar ---- */
 
 .topbar {
+    grid-column: 1 / -1;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -16,8 +18,6 @@
 }
 
 .topbar-inner {
-    max-width: 1280px;
-    margin: 0 auto;
     padding: 0 24px;
     min-height: 64px;
     display: flex;
@@ -51,37 +51,6 @@
     font-size: var(--app-text-md);
     font-weight: 700;
     letter-spacing: -0.015em;
-}
-
-.nav-links {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    flex: 1;
-}
-
-.nav-links a {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border-radius: var(--app-radius-sm);
-    color: var(--app-text-muted);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: var(--app-text-base);
-    transition: background-color var(--app-duration) var(--app-ease),
-        color var(--app-duration) var(--app-ease);
-}
-
-.nav-links a:hover {
-    background-color: var(--app-surface-2);
-    color: var(--app-text);
-}
-
-.nav-links a.active {
-    background-color: var(--app-brand-soft);
-    color: var(--app-brand-text);
 }
 
 .user-area {
@@ -153,6 +122,35 @@
     min-width: 0;
 }
 
+.sidebar {
+    position: sticky;
+    top: 64px;
+    align-self: start;
+    height: calc(100dvh - 64px);
+    overflow-y: auto;
+    padding: 24px 16px;
+    background-color: var(--app-surface);
+    border-right: 1px solid var(--app-border);
+}
+
+.nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--app-border);
+}
+
+.nav-section-title {
+    margin: 0 0 8px;
+    padding-inline: 14px;
+    font-size: var(--app-text-sm);
+    font-weight: 600;
+    letter-spacing: normal;
+    color: var(--app-text-muted);
+}
+
 /* ---- Drawer ---- */
 
 .drawer-header {
@@ -203,6 +201,8 @@
 /* ---- Responsive ---- */
 
 @media (max-width: 860px) {
+    .app-shell { grid-template-columns: minmax(0, 1fr); }
+    .sidebar { display: none; }
     .topbar-inner {
         padding: 10px 16px;
         gap: 10px;
@@ -216,9 +216,6 @@
         margin-right: 0;
     }
 
-    .nav-links {
-        display: none;
-    }
 
     .user-meta {
         display: none;
@@ -245,4 +242,7 @@
     .brand-name {
         font-size: var(--app-text-base);
     }
+}
+@media (max-width: 380px) {
+    .brand-name { display: none; }
 }

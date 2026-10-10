@@ -1,0 +1,116 @@
+.celda-nombre {
+    font-weight: 600;
+    color: var(--app-text);
+    white-space: nowrap;
+}
+
+.col-acciones {
+    width: 108px;
+}
+
+.moneda {
+    white-space: nowrap;
+}
+
+.texto-pendiente {
+    color: var(--app-danger);
+    font-weight: 600;
+}
+
+/* La columna de estado ya trae su propio switch: no lo hacemos encogible. */
+td .switch-label {
+    white-space: nowrap;
+}
+
+/* Select de filtro con ancho propio para no empujar el resto de la toolbar. */
+:host ::ng-deep .filtro-select {
+    min-width: 160px;
+}
+
+.detalle-lista {
+    display: flex;
+    flex-direction: column;
+}
+
+.detalle-fila {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 11px 2px;
+}
+
+.detalle-fila + .detalle-fila {
+    border-top: 1px solid var(--app-border-subtle);
+}
+
+.detalle-label {
+    font-size: var(--app-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--app-text-subtle);
+}
+
+.detalle-valor {
+    font-weight: 600;
+    color: var(--app-text);
+    text-align: right;
+    word-break: break-word;
+}
+
+.switch-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: var(--app-text-base);
+    color: var(--app-text-muted);
+    cursor: pointer;
+    user-select: none;
+}
+
+.cuotas-titulo {
+    margin: 24px 0 10px;
+    font-size: var(--app-text-md);
+    letter-spacing: -0.015em;
+}
+
+.cuotas-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--app-text-sm);
+}
+
+.cuotas-tabla th {
+    text-align: left;
+    font-size: var(--app-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--app-text-subtle);
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--app-border);
+}
+
+.cuotas-tabla td {
+    padding: 7px 6px;
+    border-bottom: 1px solid var(--app-border-subtle);
+    color: var(--app-text);
+}
+
+.cuotas-tabla tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.cuotas-tabla .tabular {
+    text-align: right;
+}
+
+@media (max-width: 720px) {
+    .toolbar-filters {
+        width: 100%;
+    }
+
+    :host ::ng-deep .filtro-select {
+        flex: 1;
+        min-width: 0;
+    }
+}

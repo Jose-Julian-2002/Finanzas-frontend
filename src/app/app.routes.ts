@@ -21,6 +21,16 @@ export const routes: Routes = [
         loadComponent: () => import('./features/clientes/clientes').then((m) => m.ClientesComponent)
       },
       {
+        path: 'prestamos',
+        canActivate: [permissionGuard('Prestamos.Ver')],
+        loadComponent: () => import('./features/prestamos/prestamos').then((m) => m.PrestamosComponent)
+      },
+      {
+        path: 'contratos',
+        canActivate: [permissionGuard('Contratos.Ver')],
+        loadComponent: () => import('./features/contratos/contratos').then((m) => m.ContratosComponent)
+      },
+      {
         path: 'propiedades',
         canActivate: [permissionGuard('Propiedades.Ver')],
         loadComponent: () =>
