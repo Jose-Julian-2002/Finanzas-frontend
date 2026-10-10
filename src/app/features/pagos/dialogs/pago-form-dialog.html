@@ -1,5 +1,5 @@
-<p-dialog [visible]="visible" (visibleChange)="visibleChange.emit($event)" [modal]="true" header="Nuevo recibo de pago"
-  [style]="{ width: '680px', maxWidth: 'calc(100vw - 32px)' }" [draggable]="false" [blockScroll]="true">
+<p-dialog [visible]="visible" (visibleChange)="visibleChange.emit($event)" [modal]="true" header="Registrar nuevo recibo de pago"
+  [style]="{ width: '640px', maxWidth: 'calc(100vw - 32px)' }" [draggable]="false" [blockScroll]="true">
 
   <p-message severity="error" [text]="errorMessage()" *ngIf="errorMessage()"
     [style]="{ 'margin-bottom': '16px', 'display': 'block' }"></p-message>
@@ -7,12 +7,15 @@
   <form [formGroup]="form" (ngSubmit)="guardar()" class="dialog-form">
     <div class="form-grid encabezado">
       <div class="field">
-        <label for="pagoFecha">Fecha del recibo</label>
-        <p-datepicker inputId="pagoFecha" formControlName="fecha" dateFormat="dd/mm/yy" [showIcon]="true"
-          [showTime]="false" appendTo="body" placeholder="dd/mm/aaaa"></p-datepicker>
-        <small class="field-error" *ngIf="fecha.invalid && fecha.touched">
-          Indique la fecha del recibo.
+        <label for="pagoCliente">Cliente</label>
+        <p-select inputId="pagoCliente" formControlName="clienteId" [options]="clientes()"
+          optionLabel="nombre" optionValue="id" placeholder="Seleccione el cliente" [showClear]="true"
+          [filter]="true" filterBy="nombre" appendTo="body"
+          (ngModelChange)="onClienteCambiado($event)"></p-select>
+        <small class="field-error" *ngIf="clienteId.invalid && clienteId.touched">
+          Seleccione el cliente del recibo.
         </small>
+        <small class="field-hint">Al elegirlo se cargan sus contratos de alquiler y prestamos vigentes.</small>
       </div>
 
       <div class="field">
@@ -24,62 +27,61 @@
           Seleccione el metodo de pago.
         </small>
       </div>
-
-      <div class="field">
-        <label for="pagoCliente">Cliente (opcional)</label>
-        <p-select inputId="pagoCliente" formControlName="clienteFiltro" [options]="clientes()"
-          optionLabel="nombre" optionValue="id" placeholder="Filtrar prestamos y contratos" [showClear]="true"
-          [filter]="true" filterBy="nombre" appendTo="body" (ngModelChange)="onFiltroClienteCambio($event)"></p-select>
-        <small class="field-hint">Acota la lista de aplicaciones a un solo cliente.</small>
-      </div>
     </div>
 
-    <div class="aplicaciones">
-      <div class="aplicaciones-head">
-        <h3>Aplicaciones</h3>
-        <p-button label="Agregar aplicacion" icon="pi pi-plus" severity="secondary" [text]="true"
-          type="button" (onClick)="agregarFila()"></p-button>
-      </div>
+    <div class="fecha-recibo">
+      <i class="pi pi-calendar" aria-hidden="true"></i>
+      <span>Fecha del recibo</span>
+      <strong>{{ formatearFechaRecibo() }}</strong>
+      <small>el servidor registra la fecha y hora del cobro</small>
+    </div>
 
-      <p-message severity="info" *ngIf="cargandoDestinos()" text="Cargando prestamos y contratos activos..."
-        [style]="{ 'margin-bottom': '12px', 'display': 'block' }"></p-message>
+    <ng-container *ngIf="tienenCliente; else sinCliente">
+      <div class="aplicaciones">
+        <div class="aplicaciones-head">
+          <h3>Aplicaciones</h3>
+          <p-button label="Agregar otra aplicacion" icon="pi pi-plus" severity="secondary" [text]="true"
+            type="button" [disabled]="cargandoDestinos()" (onClick)="agregarFila()"></p-button>
+        </div>
 
-      <ng-container *ngIf="filas().length > 0; else sinFilas">
-        <div class="fila-pago" *ngFor="let fila of filas()" [class.fila-error]="tieneErrorFila(fila)">
+        <p-message severity="info" *ngIf="cargandoDestinos()" text="Cargando deudas del cliente..."
+          [style]="{ 'margin-bottom': '12px', 'display': 'block' }"></p-message>
+
+        <div class="fila-pago" *ngFor="let fila of filas; let i = index; trackBy: rastrearFila"
+          [formGroup]="fila" [class.fila-error]="mostrarErrorFila(fila)">
           <div class="fila-celda destino">
-            <p-select [ngModel]="fila.destino" (ngModelChange)="fila.destino = $event; onDestinoCambiado(fila)"
-              [options]="destinos()" optionLabel="etiqueta" optionValue="clave" placeholder="Prestamo o contrato"
-              [showClear]="true" [filter]="true" filterBy="etiqueta" appendTo="body"
-              [styleClass]="'destino-select'"></p-select>
-            <small class="field-error" *ngIf="tieneErrorFila(fila) && !fila.destino">
+            <p-select formControlName="destino" [options]="destinos()" optionLabel="etiqueta" optionValue="clave"
+              placeholder="Contrato o prestamo" [showClear]="true" [filter]="true" filterBy="etiqueta" appendTo="body"
+              [styleClass]="'destino-select'" (ngModelChange)="onDestinoCambiado(i, $event)"></p-select>
+            <small class="field-error" *ngIf="errorDestino(fila)">
               Indique a que prestamo o contrato aplica.
             </small>
           </div>
 
           <div class="fila-celda">
-            <p-inputnumber [(ngModel)]="fila.monto" mode="currency" currency="COP" locale="es-CO"
+            <p-inputnumber formControlName="montoAplicado" mode="currency" currency="COP" locale="es-CO"
               [min]="0" placeholder="Monto" [styleClass]="'monto-input'"></p-inputnumber>
-            <small class="field-error" *ngIf="tieneErrorFila(fila) && !(fila.monto && fila.monto > 0)">
+            <small class="field-error" *ngIf="errorMonto(fila)">
               El monto debe ser mayor que cero.
             </small>
           </div>
 
-          <div class="fila-celda fecha">
-            <p-datepicker [(ngModel)]="fila.fechaPago" dateFormat="dd/mm/yy" [showIcon]="true"
-              placeholder="Fecha (usa la del recibo)" appendTo="body"></p-datepicker>
-          </div>
-
           <div class="fila-celda quitar">
             <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" type="button"
-              ariaLabel="Quitar aplicacion" (onClick)="quitarFila(fila)"></p-button>
+              [disabled]="filas.length <= 1" ariaLabel="Quitar aplicacion" (onClick)="quitarFila(i)"></p-button>
           </div>
         </div>
-      </ng-container>
 
-      <ng-template #sinFilas>
-        <p class="sin-filas">Agregue al menos una aplicacion: cada una aplica su monto a un prestamo o a un contrato.</p>
-      </ng-template>
-    </div>
+        <p class="fila-hint">El monto se rellena con la cuota del prestamo o el alquiler del contrato; puede editarlo libremente.</p>
+      </div>
+    </ng-container>
+
+    <ng-template #sinCliente>
+      <div class="estado-vacio-seccion">
+        <i class="pi pi-user" aria-hidden="true"></i>
+        <p>Seleccione un cliente para cargar sus contratos de alquiler y prestamos vigentes.</p>
+      </div>
+    </ng-template>
 
     <div class="total-recibo">
       <span>Total del recibo</span>

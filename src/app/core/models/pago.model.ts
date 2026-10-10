@@ -34,21 +34,21 @@ export interface PagoFiltros {
 
 /**
  * Una aplicacion del recibo. El backend exige que aplique a UN solo destino:
- * prestamoId o contratoId, nunca ambos ni ninguno.
+ * prestamoId o contratoId, nunca ambos ni ninguno. La fecha de cada detalle
+ * la asigna el servidor junto con la del recibo.
  */
 export interface DetallePagoRequest {
   montoAplicado: number;
-  fechaPago: string | null;
   prestamoId: number | null;
   contratoId: number | null;
 }
 
 /**
- * Cuerpo de POST /api/Pagos. El montoTotal NO se envia: el servidor lo calcula
- * como la suma de los detalles, y el usuarioId lo toma del token.
+ * Cuerpo de POST /api/Pagos. La fecha la asigna el servidor y el usuarioId
+ * (cajero) sale del token; el montoTotal se calcula como suma de los detalles.
  */
 export interface CrearPagoCommand {
-  fecha: string;
+  clienteId: number;
   metodoPagoId: number;
   detalles: DetallePagoRequest[];
 }

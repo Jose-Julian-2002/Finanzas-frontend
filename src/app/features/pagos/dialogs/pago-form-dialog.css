@@ -1,11 +1,39 @@
 .form-grid.encabezado {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px;
     margin-bottom: 4px;
 }
 
-:host ::ng-deep .p-datepicker,
+.fecha-recibo {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 14px 0 4px;
+    padding: 10px 14px;
+    border: 1px dashed var(--app-border);
+    border-radius: var(--app-radius-md, 8px);
+    background: var(--app-surface-muted, transparent);
+    color: var(--app-text-muted);
+    font-size: var(--app-text-sm);
+}
+
+.fecha-recibo i {
+    align-self: center;
+    font-size: var(--app-text-md);
+}
+
+.fecha-recibo strong {
+    font-size: var(--app-text-base);
+    font-weight: 700;
+    color: var(--app-text);
+}
+
+.fecha-recibo small {
+    margin-left: auto;
+    letter-spacing: 0.03em;
+}
+
 :host ::ng-deep .p-inputnumber {
     width: 100%;
 }
@@ -32,7 +60,7 @@
 
 .fila-pago {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 140px 170px 40px;
+    grid-template-columns: minmax(0, 1fr) 150px 40px;
     gap: 10px;
     align-items: start;
     padding: 12px;
@@ -59,10 +87,34 @@
     width: 100%;
 }
 
-.sin-filas {
+.fila-hint {
+    margin: 4px 0 0;
     color: var(--app-text-muted);
     font-size: var(--app-text-sm);
-    margin: 4px 0 0;
+}
+
+.estado-vacio-seccion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-direction: column;
+    padding: 28px 16px;
+    margin-top: 18px;
+    border: 1px dashed var(--app-border);
+    border-radius: var(--app-radius-md, 8px);
+    color: var(--app-text-muted);
+    text-align: center;
+}
+
+.estado-vacio-seccion i {
+    font-size: 1.5rem;
+    opacity: 0.7;
+}
+
+.estado-vacio-seccion p {
+    margin: 0;
+    font-size: var(--app-text-sm);
 }
 
 .total-recibo {
@@ -80,7 +132,7 @@
     font-weight: 700;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 600px) {
     .form-grid.encabezado {
         grid-template-columns: minmax(0, 1fr);
     }
@@ -89,8 +141,11 @@
         grid-template-columns: minmax(0, 1fr) 110px 40px;
     }
 
-    .fila-pago .fila-celda.fecha {
-        grid-column: 1 / -1;
-        grid-row: 2;
+    .fecha-recibo {
+        flex-wrap: wrap;
+    }
+
+    .fecha-recibo small {
+        margin-left: 0;
     }
 }
