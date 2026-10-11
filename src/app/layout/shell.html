@@ -61,35 +61,44 @@
 
 <ng-template #navigation>
   <nav class="drawer-links" aria-label="Secciones">
-    <a routerLink="/clientes" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerClientes" (click)="drawerVisible.set(false)">
-      <i class="pi pi-users" aria-hidden="true"></i><span>Clientes</span>
-    </a>
-    <a routerLink="/prestamos" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerPrestamos" (click)="drawerVisible.set(false)">
-      <i class="pi pi-dollar" aria-hidden="true"></i><span>Prestamos</span>
-    </a>
-    <a routerLink="/pagos" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerPagos" (click)="drawerVisible.set(false)">
-      <i class="pi pi-money-bill" aria-hidden="true"></i><span>Pagos</span>
-    </a>
-    <a routerLink="/contratos" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerContratos" (click)="drawerVisible.set(false)">
-      <i class="pi pi-file-signature" aria-hidden="true"></i><span>Contratos</span>
-    </a>
-    <a routerLink="/propiedades" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerPropiedades" (click)="drawerVisible.set(false)">
-      <i class="pi pi-building" aria-hidden="true"></i><span>Propiedades</span>
-    </a>
-    <a routerLink="/tipos-propiedad" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerTiposPropiedad" (click)="drawerVisible.set(false)">
-      <i class="pi pi-tags" aria-hidden="true"></i><span>Tipos de propiedad</span>
-    </a>
-    <a routerLink="/metodos-pago" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerMetodosPago" (click)="drawerVisible.set(false)">
-      <i class="pi pi-credit-card" aria-hidden="true"></i><span>Metodos de pago</span>
-    </a>
+    <section class="nav-section" *ngIf="puedeVerClientes || puedeVerPrestamos || puedeVerPagos" aria-label="Gestión financiera">
+      <h2 class="nav-section-title">Gestión financiera</h2>
+      <a routerLink="/clientes" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerClientes" (click)="drawerVisible.set(false)">
+        <i class="pi pi-users" aria-hidden="true"></i><span>Clientes</span>
+      </a>
+      <a routerLink="/prestamos" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerPrestamos" (click)="drawerVisible.set(false)">
+        <i class="pi pi-dollar" aria-hidden="true"></i><span>Préstamos</span>
+      </a>
+      <a routerLink="/pagos" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerPagos" (click)="drawerVisible.set(false)">
+        <i class="pi pi-money-bill" aria-hidden="true"></i><span>Pagos</span>
+      </a>
+    </section>
+    <section class="nav-section" *ngIf="puedeVerPropiedades || puedeVerContratos" aria-label="Inmuebles">
+      <h2 class="nav-section-title">Inmuebles</h2>
+      <a routerLink="/propiedades" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerPropiedades" (click)="drawerVisible.set(false)">
+        <i class="pi pi-building" aria-hidden="true"></i><span>Propiedades</span>
+      </a>
+      <a routerLink="/contratos" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerContratos" (click)="drawerVisible.set(false)">
+        <i class="pi pi-file-signature" aria-hidden="true"></i><span>Contratos</span>
+      </a>
+    </section>
+    <section class="nav-section" *ngIf="puedeVerTiposPropiedad || puedeVerMetodosPago" aria-label="Catálogos">
+      <h2 class="nav-section-title">Catálogos</h2>
+      <a routerLink="/tipos-propiedad" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerTiposPropiedad" (click)="drawerVisible.set(false)">
+        <i class="pi pi-tags" aria-hidden="true"></i><span>Tipos de propiedad</span>
+      </a>
+      <a routerLink="/metodos-pago" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerMetodosPago" (click)="drawerVisible.set(false)">
+        <i class="pi pi-credit-card" aria-hidden="true"></i><span>Métodos de pago</span>
+      </a>
+    </section>
     <section class="nav-section" *ngIf="puedeVerUsuarios || puedeVerRoles" aria-label="Administración">
       <h2 class="nav-section-title">Administración</h2>
       <a routerLink="/usuarios" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerUsuarios" (click)="drawerVisible.set(false)">
-        <i class="pi pi-id-card" aria-hidden="true"></i><span>Usuarios</span>
-      </a>
+          <i class="pi pi-id-card" aria-hidden="true"></i><span>Usuarios</span>
+        </a>
       <a routerLink="/roles" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerRoles" (click)="drawerVisible.set(false)">
-        <i class="pi pi-shield" aria-hidden="true"></i><span>Roles</span>
-      </a>
+          <i class="pi pi-shield" aria-hidden="true"></i><span>Roles</span>
+        </a>
     </section>
   </nav>
 </ng-template>
@@ -104,3 +113,4 @@
   [titulo]="authService.debeCambiarPasswordInicial() ? 'Cambie su contrasena inicial' : 'Cambiar contrasena'"
   [bloqueante]="authService.debeCambiarPasswordInicial()">
 </app-cambiar-password-dialog>
+
