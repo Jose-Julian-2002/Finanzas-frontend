@@ -10,6 +10,7 @@ import { Select } from 'primeng/select';
 import { Paginator, PaginatorState } from 'primeng/paginator';
 import { ReporteService } from '../../core/services/reporte';
 import { DatosFinancierosService } from '../../core/services/datos-financieros';
+import { AuthService } from '../../core/services/auth';
 import { DashboardReporte, CobroReporte, FilaReporte, TipoReporte, ReporteFiltros } from '../../core/models/reporte.model';
 import { PaginatedResponse } from '../../core/models/common.model';
 import { OPCIONES_COBRANZA } from '../../core/models/cobranza.model';
@@ -26,6 +27,7 @@ export class ReportesComponent implements OnInit {
   private readonly service = inject(ReporteService);
   private readonly cambios = inject(DatosFinancierosService);
   private readonly route = inject(ActivatedRoute);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
   private peticion?: Subscription;
   readonly tipo = signal<TipoReporte>('Dashboard');
@@ -41,7 +43,7 @@ export class ReportesComponent implements OnInit {
   readonly monto = formatoMonto;
   readonly etiqueta = etiquetaReporte;
   readonly secciones = [
-    { ruta: 'dashboard', titulo: 'Dashboard' }, { ruta: 'cobros', titulo: 'Cobros' },
+    { ruta: 'cobros', titulo: 'Cobros' },
     { ruta: 'prestamos', titulo: 'Préstamos' }, { ruta: 'contratos', titulo: 'Contratos' }
   ];
   filtros: ReporteFiltros = { estadoCobranza: 'Todos', pagina: 1, tamano: 50, soloActivos: true };
@@ -80,6 +82,12 @@ export class ReportesComponent implements OnInit {
   private cargar(): void {
     this.peticion?.unsubscribe();
     this.error.set('');
+    if (this.tipo() === 'Dashboard' && !this.auth.hasPermission('Reportes.Ver')) {
+      this.dashboard.set(null);
+      this.error.set('Su cuenta no tiene permiso para consultar el resumen financiero. Solicite acceso al administrador.');
+      this.cargando.set(false);
+      return;
+    }
     if (this.filtros.desde && this.filtros.hasta && this.filtros.desde > this.filtros.hasta) {
       this.error.set('La fecha inicial debe ser anterior o igual a la fecha final.');
       this.cargando.set(false);
