@@ -1,6 +1,11 @@
 import { PaginatedResponse } from './common.model';
 
 export interface PagoDto {
+  anulado: boolean;
+  fechaAnulacion: string | null;
+  anuladoPorId: number | null;
+  anuladoPor: string | null;
+  motivoAnulacion: string | null;
   id: number;
   fecha: string;
   montoTotal: number;
@@ -26,6 +31,7 @@ export interface DetallePago {
 }
 
 export interface PagoFiltros {
+  incluirAnulados?: boolean;
   metodoPagoId: number | null;
   clienteId: number | null;
   pagina: number;

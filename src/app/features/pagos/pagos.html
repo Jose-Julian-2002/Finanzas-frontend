@@ -9,6 +9,7 @@
 
   <div class="toolbar">
     <div class="toolbar-filters">
+      <label><input type="checkbox" [ngModel]="incluirAnulados()" (ngModelChange)="onIncluirAnulados($event)" /> Incluir anulados</label>
       <p-select [ngModel]="filtroMetodoId()" (ngModelChange)="onFiltroMetodo($event)"
         [options]="metodos()" optionLabel="nombre" optionValue="id" placeholder="Metodo de pago" [showClear]="true"
         styleClass="filtro-select" aria-label="Filtrar por metodo de pago"></p-select>
@@ -30,7 +31,7 @@
         <th>Metodo de pago</th>
         <th>Aplicaciones</th>
         <th class="tabular">Monto total</th>
-        <th>Registrado por</th>
+        <th>Registrado por</th><th>Estado</th>
         <th class="col-acciones">Acciones</th>
       </tr>
     </ng-template>
@@ -41,14 +42,14 @@
         <td>{{ pago.metodoPago }}</td>
         <td class="tabular">{{ pago.totalDetalles }}</td>
         <td class="tabular moneda">{{ formatearMonto(pago.montoTotal) }}</td>
-        <td class="celda-nombre">{{ pago.usuario }}</td>
+        <td class="celda-nombre">{{ pago.usuario }}</td><td>{{ pago.anulado ? 'Anulado' : 'Vigente' }}</td>
         <td class="col-acciones">
           <div class="acciones">
             <p-button icon="pi pi-eye" severity="secondary" [text]="true" [rounded]="true" pTooltip="Ver recibo"
               tooltipPosition="top" ariaLabel="Ver recibo" (onClick)="abrirDetalle(pago)"></p-button>
 
-            <p-button *ngIf="puedeEliminar" icon="pi pi-ban" severity="danger" [text]="true" [rounded]="true"
-              pTooltip="Anular recibo" tooltipPosition="top" ariaLabel="Anular recibo"
+            <p-button *ngIf="puedeAnular(pago)" icon="pi pi-ban" severity="danger" [text]="true"
+              label="Anular pago" pTooltip="Anular pago" tooltipPosition="top" ariaLabel="Anular pago"
               (onClick)="confirmarEliminar(pago)"></p-button>
           </div>
         </td>
@@ -57,7 +58,7 @@
 
     <ng-template #emptymessage>
       <tr>
-        <td colspan="6">
+        <td colspan="7">
           <div class="estado-vacio">
             <i class="pi pi-inbox"></i>
             <p>No se encontraron pagos.</p>
@@ -100,6 +101,12 @@
       </div>
     </div>
 
+    <section *ngIf="d.pago.anulado" aria-label="Anulación del pago">
+      <h3 class="detalle-seccion">Pago anulado</h3>
+      <p>Por {{ d.pago.anuladoPor }} · {{ d.pago.fechaAnulacion | date:'dd/MM/yyyy HH:mm' }}</p>
+      <p>{{ d.pago.motivoAnulacion }}</p>
+    </section>
+    <p-button *ngIf="puedeAnular(d.pago)" label="Anular pago" icon="pi pi-ban" severity="danger" [outlined]="true" (onClick)="confirmarEliminar(d.pago)"></p-button>
     <h3 class="detalle-seccion">Aplicaciones</h3>
     <table class="detalles-tabla">
       <thead>
@@ -118,4 +125,19 @@
       </tbody>
     </table>
   </ng-container>
+</p-dialog>
+<p-dialog header="Anular pago" [visible]="pagoAnulando() !== null" (visibleChange)="!$event && !anulando() && pagoAnulando.set(null)"
+  [modal]="true" [closable]="!anulando()" [closeOnEscape]="!anulando()" [draggable]="false" [style]="{ width: '30rem', maxWidth: '95vw' }">
+  <form (ngSubmit)="anular()" class="dialog-form" [attr.aria-busy]="anulando()">
+    <p>Se anulará el pago #{{ pagoAnulando()?.id }}. El recibo se conservará y dejará de contar en saldos y reportes.</p>
+    <div class="field">
+      <label for="motivo-anulacion">Motivo de anulación</label>
+      <textarea id="motivo-anulacion" name="motivo" [(ngModel)]="motivoAnulacion" rows="3" required [disabled]="anulando()" aria-describedby="error-anulacion"></textarea>
+      <p id="error-anulacion" class="field-error" role="alert" *ngIf="errorAnulacion()">{{ errorAnulacion() }}</p>
+    </div>
+    <div class="dialog-actions">
+      <p-button label="Cancelar" severity="secondary" [outlined]="true" [disabled]="anulando()" (onClick)="pagoAnulando.set(null)"></p-button>
+      <p-button label="Anular pago" severity="danger" type="submit" [loading]="anulando()" [disabled]="!motivoAnulacion.trim() || anulando()"></p-button>
+    </div>
+  </form>
 </p-dialog>

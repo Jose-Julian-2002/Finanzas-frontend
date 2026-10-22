@@ -16,6 +16,7 @@
     </div>
 
     <div class="toolbar-filters">
+      <p-select [ngModel]="estadoCobranza()" (ngModelChange)="onFiltroCobranza($event)" [options]="opcionesCobranza" optionLabel="label" optionValue="value" aria-label="Estado de cobranza"></p-select>
       <p-select [ngModel]="filtroClienteId()" (ngModelChange)="onFiltroCliente($event)"
         [options]="clientes()" optionLabel="nombre" optionValue="id" placeholder="Inquilino"
         [showClear]="true" styleClass="filtro-select" aria-label="Filtrar por cliente"></p-select>
@@ -44,6 +45,11 @@
         <th class="tabular">Garantia</th>
         <th>Vigencia</th>
         <th class="tabular">Pagos</th>
+        <th>Abonado</th>
+        <th>Saldo</th>
+        <th>Cobranza</th>
+        <th>Vencido / atraso</th>
+        <th>Próximo vencimiento</th>
         <th>Estado</th>
         <th class="col-acciones">Acciones</th>
       </tr>
@@ -59,9 +65,13 @@
           <span>{{ contrato.fechaInicio | date: 'dd/MM/yyyy' }} a {{ contrato.fechaFin | date: 'dd/MM/yyyy' }}</span>
         </td>
         <td class="tabular">{{ contrato.totalPagos }}</td>
+        <td>{{ formatearMonto(contrato.totalAbonado) }}</td><td>{{ formatearMonto(contrato.saldoPendiente) }}</td>
+        <td><span [class.texto-pendiente]="contrato.estadoCobranza === 'Moroso'">{{ contrato.estadoCobranza === 'AlDia' ? 'Al día' : contrato.estadoCobranza }}</span></td>
+        <td class="tabular">{{ formatearMonto(contrato.saldoVencido) }} · {{ contrato.cuotasVencidas }} cuotas · {{ contrato.diasAtrasoMax }} días</td>
+        <td>{{ (contrato.proximoVencimiento | date:'dd/MM/yyyy') || '—' }}</td>
         <td>
           <label class="switch-label">
-            <p-toggleSwitch [ngModel]="contrato.estado" (ngModelChange)="onCambiarEstado(contrato, $event)"></p-toggleSwitch>
+            <p-toggleSwitch [disabled]="!puedeEditar" [ngModel]="contrato.estado" (ngModelChange)="onCambiarEstado(contrato, $event)"></p-toggleSwitch>
             <span>{{ contrato.estado ? 'Activo' : 'Inactivo' }}</span>
           </label>
         </td>
@@ -84,7 +94,7 @@
 
     <ng-template #emptymessage>
       <tr>
-        <td colspan="8">
+        <td colspan="13">
           <div class="estado-vacio">
             <i class="pi pi-inbox"></i>
             <p>No se encontraron contratos.</p>
@@ -99,7 +109,7 @@
   [contrato]="contratoEditando()" (guardado)="alGuardar()"></app-contrato-form-dialog>
 
 <p-dialog header="Detalle del contrato" [visible]="detalleVisible()" (visibleChange)="detalleVisible.set($event)"
-  [modal]="true" [style]="{ width: '34rem' }" [draggable]="false">
+  [modal]="true" [style]="{ width: '64rem', maxWidth: '95vw' }" [draggable]="false">
   <ng-container *ngIf="detalleCargando()">
     <div class="estado-vacio">
       <i class="pi pi-spin pi-spinner"></i>
@@ -150,5 +160,9 @@
         <span class="detalle-valor">{{ c.estado ? 'Activo' : 'Inactivo' }}</span>
       </div>
     </div>
+    <ng-container *ngIf="detalle() as d">
+      <p>Alquiler esperado: {{ formatearMonto(c.alquilerEsperado) }} · {{ c.totalMensualidades }} mensualidades</p>
+      <app-cobranza-detalle [resumen]="c" [cuotas]="d.mensualidades" [pagos]="d.pagos" titulo="Mensualidades"></app-cobranza-detalle>
+    </ng-container>
   </ng-container>
 </p-dialog>

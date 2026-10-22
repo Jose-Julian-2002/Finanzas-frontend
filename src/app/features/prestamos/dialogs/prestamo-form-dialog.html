@@ -18,8 +18,8 @@
     <div class="form-grid">
       <div class="field">
         <label for="preCapital">Monto del capital</label>
-        <p-inputnumber inputId="preCapital" formControlName="montoCapital" mode="currency" currency="COP"
-          locale="es-CO" [min]="0" placeholder="0"></p-inputnumber>
+        <p-inputnumber inputId="preCapital" formControlName="montoCapital" mode="currency" currency="BOB" currencyDisplay="narrowSymbol"
+          locale="es-BO" [minFractionDigits]="2" [maxFractionDigits]="2" [min]="0" placeholder="0"></p-inputnumber>
         <small class="field-error" *ngIf="montoCapital.invalid && montoCapital.touched">
           Ingrese un capital mayor que cero.
         </small>

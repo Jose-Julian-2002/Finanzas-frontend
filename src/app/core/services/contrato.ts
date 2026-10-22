@@ -9,6 +9,7 @@ import {
   ContratoListado,
   CrearContratoCommand
 } from '../models/contrato.model';
+import { DetalleContrato } from '../models/contrato.model';
 import { CambiarEstadoCommand } from '../models/common.model';
 
 @Injectable({
@@ -23,13 +24,12 @@ export class ContratoService {
     let params = new HttpParams()
       .set('pagina', filtros.pagina)
       .set('tamano', filtros.tamano);
+    params = params.set('estadoCobranza', filtros.estadoCobranza ?? 'Todos')
+      .set('soloActivos', filtros.soloActivos);
 
     const buscar = filtros.buscar.trim();
     if (buscar.length > 0) {
       params = params.set('buscar', buscar);
-    }
-    if (filtros.soloActivos) {
-      params = params.set('soloActivos', true);
     }
     if (filtros.clienteId !== null) {
       params = params.set('clienteId', filtros.clienteId);
@@ -41,8 +41,8 @@ export class ContratoService {
     return this.http.get<ContratoListado>(this.apiUrl, { params });
   }
 
-  obtener(id: number): Observable<ContratoDto> {
-    return this.http.get<ContratoDto>(`${this.apiUrl}/${id}`);
+  obtener(id: number): Observable<DetalleContrato> {
+    return this.http.get<DetalleContrato>(`${this.apiUrl}/${id}`);
   }
 
   crear(contrato: CrearContratoCommand): Observable<unknown> {

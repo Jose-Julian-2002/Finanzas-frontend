@@ -22,6 +22,7 @@ export class PagoService {
     let params = new HttpParams()
       .set('pagina', filtros.pagina)
       .set('tamano', filtros.tamano);
+    params = params.set('incluirAnulados', filtros.incluirAnulados ?? false);
 
     if (filtros.metodoPagoId !== null) {
       params = params.set('metodoPagoId', filtros.metodoPagoId);
@@ -37,15 +38,11 @@ export class PagoService {
     return this.http.get<DetallePago>(`${this.apiUrl}/${id}`);
   }
 
-  crear(pago: CrearPagoCommand): Observable<unknown> {
-    return this.http.post<unknown>(this.apiUrl, pago);
+  crear(pago: CrearPagoCommand): Observable<number> {
+    return this.http.post<number>(this.apiUrl, pago);
   }
 
-  /**
-   * Borrado fisico del recibo y sus detalles (cascade). No existe edicion:
-   * un recibo se anula y se rehace.
-   */
-  eliminar(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  anular(id: number, motivo: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { body: { motivo: motivo.trim() } });
   }
 }

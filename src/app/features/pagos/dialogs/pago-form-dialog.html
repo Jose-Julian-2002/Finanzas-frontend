@@ -59,7 +59,7 @@
           </div>
 
           <div class="fila-celda">
-            <p-inputnumber formControlName="montoAplicado" mode="currency" currency="COP" locale="es-CO"
+            <p-inputnumber formControlName="montoAplicado" mode="currency" currency="BOB" currencyDisplay="narrowSymbol" locale="es-BO" [minFractionDigits]="2" [maxFractionDigits]="2"
               [min]="0" placeholder="Monto" [styleClass]="'monto-input'"></p-inputnumber>
             <small class="field-error" *ngIf="errorMonto(fila)">
               El monto debe ser mayor que cero.
@@ -72,7 +72,7 @@
           </div>
         </div>
 
-        <p class="fila-hint">El monto se rellena con la cuota del prestamo o el alquiler del contrato; puede editarlo libremente.</p>
+        <p class="fila-hint">El monto se rellena con la cuota o el alquiler, hasta el saldo pendiente. El servidor lo aplica primero a las cuotas más antiguas.</p>
       </div>
     </ng-container>
 
@@ -83,6 +83,7 @@
       </div>
     </ng-template>
 
+    <p class="field-error" role="alert" *ngIf="errorDeSaldos() as errorSaldo">{{ errorSaldo }}</p>
     <div class="total-recibo">
       <span>Total del recibo</span>
       <strong class="tabular">{{ formatearMonto(totalRecibo) }}</strong>
@@ -96,3 +97,4 @@
     </div>
   </form>
 </p-dialog>
+

@@ -16,6 +16,7 @@
     </div>
 
     <div class="toolbar-filters">
+      <p-select [ngModel]="estadoCobranza()" (ngModelChange)="onFiltroCobranza($event)" [options]="opcionesCobranza" optionLabel="label" optionValue="value" aria-label="Estado de cobranza"></p-select>
       <p-select [ngModel]="filtroClienteId()" (ngModelChange)="onFiltroCliente($event)"
         [options]="clientes()" optionLabel="nombre" optionValue="id" placeholder="Cliente"
         [showClear]="true" styleClass="filtro-select" aria-label="Filtrar por cliente"></p-select>
@@ -41,6 +42,9 @@
         <th class="tabular">Cuota mensual</th>
         <th class="tabular">Abonado</th>
         <th class="tabular">Saldo</th>
+        <th>Cobranza</th>
+        <th>Vencido / atraso</th>
+        <th>Próximo vencimiento</th>
         <th>Estado</th>
         <th class="col-acciones">Acciones</th>
       </tr>
@@ -57,9 +61,12 @@
         <td class="tabular moneda">
           <span [class.texto-pendiente]="prestamo.saldoPendiente > 0">{{ formatearMonto(prestamo.saldoPendiente) }}</span>
         </td>
+        <td><span [class.texto-pendiente]="prestamo.estadoCobranza === 'Moroso'">{{ prestamo.estadoCobranza === 'AlDia' ? 'Al día' : prestamo.estadoCobranza }}</span></td>
+        <td class="tabular">{{ formatearMonto(prestamo.saldoVencido) }} · {{ prestamo.cuotasVencidas }} cuotas · {{ prestamo.diasAtrasoMax }} días</td>
+        <td>{{ (prestamo.proximoVencimiento | date:'dd/MM/yyyy') || '—' }}</td>
         <td>
           <label class="switch-label">
-            <p-toggleSwitch [ngModel]="prestamo.estado" (ngModelChange)="onCambiarEstado(prestamo, $event)"></p-toggleSwitch>
+            <p-toggleSwitch [disabled]="!puedeEditar" [ngModel]="prestamo.estado" (ngModelChange)="onCambiarEstado(prestamo, $event)"></p-toggleSwitch>
             <span>{{ prestamo.estado ? 'Activo' : 'Inactivo' }}</span>
           </label>
         </td>
@@ -82,7 +89,7 @@
 
     <ng-template #emptymessage>
       <tr>
-        <td colspan="9">
+        <td colspan="12">
           <div class="estado-vacio">
             <i class="pi pi-inbox"></i>
             <p>No se encontraron prestamos.</p>
@@ -97,7 +104,7 @@
   [prestamo]="prestamoEditando()" (guardado)="alGuardar()"></app-prestamo-form-dialog>
 
 <p-dialog header="Detalle del prestamo" [visible]="detalleVisible()" (visibleChange)="detalleVisible.set($event)"
-  [modal]="true" [style]="{ width: '38rem' }" [draggable]="false">
+  [modal]="true" [style]="{ width: '64rem', maxWidth: '95vw' }" [draggable]="false">
   <ng-container *ngIf="detalleCargando()">
     <div class="estado-vacio">
       <i class="pi pi-spin pi-spinner"></i>
@@ -149,24 +156,6 @@
       </div>
     </div>
 
-    <h3 class="cuotas-titulo">Plan de cuotas</h3>
-    <table class="cuotas-tabla">
-      <thead>
-        <tr>
-          <th>Nº</th>
-          <th class="tabular">Capital</th>
-          <th class="tabular">Interes</th>
-          <th class="tabular">Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let cuota of d.cuotas">
-          <td class="tabular">{{ cuota.numero }}</td>
-          <td class="tabular moneda">{{ formatearMonto(cuota.abonoCapital) }}</td>
-          <td class="tabular moneda">{{ formatearMonto(cuota.interes) }}</td>
-          <td class="tabular moneda">{{ formatearMonto(cuota.total) }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <app-cobranza-detalle [resumen]="d.prestamo" [cuotas]="d.cuotas" [pagos]="d.pagos" titulo="Plan de cuotas"></app-cobranza-detalle>
   </ng-container>
 </p-dialog>

@@ -1,3 +1,6 @@
+import { FiltroCobranza, OPCIONES_COBRANZA } from '../../core/models/cobranza.model';
+import { CobranzaDetalleComponent } from '../../shared/cobranza-detalle';
+import { DatosFinancierosService } from '../../core/services/datos-financieros';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DatePipe } from '@angular/common';
@@ -25,6 +28,7 @@ import { PrestamoFormDialogComponent } from './dialogs/prestamo-form-dialog';
   selector: 'app-prestamos',
   standalone: true,
   imports: [
+    CobranzaDetalleComponent,
     CommonModule,
     DatePipe,
     FormsModule,
@@ -51,6 +55,8 @@ export class PrestamosComponent implements OnInit {
   readonly cargando = signal(false);
   readonly primer = signal(0);
   readonly tamano = signal(20);
+  readonly estadoCobranza = signal<FiltroCobranza>('Todos');
+  readonly opcionesCobranza = OPCIONES_COBRANZA;
   readonly soloActivos = signal(true);
   readonly filtroClienteId = signal<number | null>(null);
 
@@ -66,12 +72,17 @@ export class PrestamosComponent implements OnInit {
   constructor(
     private prestamoService: PrestamoService,
     private clienteService: ClienteService,
+    private datosFinancieros: DatosFinancierosService,
     private authService: AuthService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService
   ) { }
 
   ngOnInit(): void {
+    this.datosFinancieros.cambios$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.cargar();
+      if (this.detalleVisible() && this.detalle()) this.abrirDetalle(this.detalle()!.prestamo);
+    });
     this.controlBusqueda.valueChanges
       .pipe(debounceTime(400), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.recargar());
@@ -108,6 +119,11 @@ export class PrestamosComponent implements OnInit {
 
   onCambiarSoloActivos(valor: boolean): void {
     this.soloActivos.set(valor);
+    this.recargar();
+  }
+
+  onFiltroCobranza(valor: FiltroCobranza): void {
+    this.estadoCobranza.set(valor);
     this.recargar();
   }
 
@@ -224,6 +240,7 @@ export class PrestamosComponent implements OnInit {
     this.cargando.set(true);
 
     this.prestamoService.listar({
+      estadoCobranza: this.estadoCobranza(),
       buscar: this.controlBusqueda.value,
       pagina: this.paginaActual,
       tamano: this.tamano(),

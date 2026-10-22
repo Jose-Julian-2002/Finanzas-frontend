@@ -14,6 +14,13 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     loadComponent: () => import('./layout/shell').then((m) => m.ShellComponent),
     children: [
+      { path: 'reportes', pathMatch: 'full', redirectTo: 'reportes/dashboard' },
+      ...(['Dashboard', 'Cobros', 'Prestamos', 'Contratos'] as const).map(tipo => ({
+        path: `reportes/${tipo.toLowerCase()}`,
+        canActivate: [permissionGuard('Reportes.Ver')],
+        data: { tipo },
+        loadComponent: () => import('./features/reportes/reportes').then(m => m.ReportesComponent)
+      })),
       { path: '', pathMatch: 'full', redirectTo: 'clientes' },
       {
         path: 'clientes',

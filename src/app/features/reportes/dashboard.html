@@ -1,0 +1,78 @@
+<div class="dashboard" [attr.aria-busy]="cargando">
+  <header class="dashboard-header">
+    <div>
+      <h1>Resumen financiero</h1>
+      <p *ngIf="datos; else fechaInicial">Del {{ datos.desde | date:'dd/MM/yyyy' }} al {{ datos.hasta | date:'dd/MM/yyyy' }}</p>
+      <ng-template #fechaInicial><p>Una mirada a tus cobros y a tu cartera actual</p></ng-template>
+    </div>
+    <div class="header-actions">
+      <label class="sr-only" for="dashboard-periodo">Período del dashboard</label>
+      <select id="dashboard-periodo" #selector [value]="periodo" (change)="cambiarPeriodo(selector.value)" [disabled]="cargando">
+        <option value="mes">Este mes</option><option value="7">Últimos 7 días</option><option value="30">Últimos 30 días</option><option value="90">Últimos 90 días</option><option value="personalizado">Personalizado</option>
+      </select>
+      <a class="primary-action" routerLink="/pagos" *ngIf="auth.hasPermission('Pagos.Ver')"><i class="pi pi-wallet" aria-hidden="true"></i> Ir a pagos</a>
+    </div>
+  </header>
+  <form *ngIf="periodo === 'personalizado'" class="date-filter" (ngSubmit)="aplicarPersonalizado()">
+    <label>Desde<input type="date" name="desde" [(ngModel)]="personalizado.desde" required /></label>
+    <label>Hasta<input type="date" name="hasta" [(ngModel)]="personalizado.hasta" required /></label>
+    <button type="submit" [disabled]="cargando || !personalizado.desde || !personalizado.hasta">Aplicar período</button>
+  </form>
+  <div class="feedback" *ngIf="error" role="alert"><i class="pi pi-exclamation-circle" aria-hidden="true"></i><p>{{ error }}</p><button (click)="aplicarPersonalizado()">Reintentar</button></div>
+  <div class="loading" *ngIf="cargando" role="status"><i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Actualizando resumen…</div>
+  <ng-container *ngIf="datos as d">
+    <div class="metrics">
+      <article class="metric"><h2>Total cobrado</h2><strong>{{ monto(d.tarjetas.totalCobrado) }}</strong><p>En el período seleccionado</p></article>
+      <article class="metric"><h2>Recibos registrados</h2><strong>{{ d.tarjetas.recibos | number }}</strong><p>Pagos vigentes del período</p></article>
+      <article class="metric"><h2>Saldo por cobrar</h2><strong>{{ monto(d.tarjetas.saldoPorCobrar) }}</strong><p>Saldo actual de la cartera</p></article>
+      <article class="metric"><h2>Obligaciones morosas</h2><strong [class.warning-text]="d.tarjetas.obligacionesMorosas > 0">{{ d.tarjetas.obligacionesMorosas | number }}</strong><p [class.warning-text]="d.tarjetas.obligacionesMorosas > 0">{{ monto(d.morosidad.saldoVencidoTotal) }} vencidos actualmente</p></article>
+    </div>
+    <div class="chart-grid">
+      <section class="panel chart-panel">
+        <div class="panel-heading"><h2>Cobros por mes</h2><span>Importe cobrado (Bs)</span></div>
+        <div *ngIf="meses.length; else sinCobros" class="chart-wrap">
+          <svg viewBox="0 0 650 270" role="img" aria-labelledby="cobros-titulo cobros-descripcion">
+            <title id="cobros-titulo">Cobros mensuales del período</title><desc id="cobros-descripcion">La tabla desplegable contiene los importes exactos de cada mes.</desc>
+            <g *ngFor="let paso of rejilla"><line x1="90" x2="608" [attr.y1]="28 + paso * 49" [attr.y2]="28 + paso * 49" class="gridline"/><text x="78" [attr.y]="33 + paso * 49" text-anchor="end" class="axis-label">{{ eje(techo * (4 - paso) / 4) }}</text></g>
+            <polygon *ngIf="area" [attr.points]="area" class="chart-area"/>
+            <polyline *ngIf="meses.length > 1" [attr.points]="linea" class="chart-line"/>
+            <g *ngFor="let mes of meses; let i = index">
+              <circle [attr.cx]="x(i)" [attr.cy]="y(mes.monto)" r="4" class="chart-dot"><title>{{ mes.mes }}: {{ monto(mes.monto) }} · {{ mes.recibos }} recibos</title></circle>
+              <text *ngIf="mostrarMes(i)" [attr.x]="x(i)" y="252" text-anchor="middle" class="axis-label">{{ mesCorto(mes.mes) }}</text>
+            </g>
+          </svg>
+          <p class="chart-note" *ngIf="meses.length === 1">El período abarca un mes. Amplía el rango para comparar meses.</p>
+          <details class="chart-values"><summary>Ver importes por mes</summary><ul><li *ngFor="let mes of meses"><span>{{ mes.mes }} · {{ mes.recibos }} recibos</span><strong>{{ monto(mes.monto) }}</strong></li></ul></details>
+        </div>
+        <ng-template #sinCobros><p class="empty">No hay cobros en este período.</p></ng-template>
+      </section>
+      <section class="panel">
+        <div class="panel-heading"><h2>Clientes con mayores cobros</h2></div>
+        <div class="bar-list" *ngIf="clientes.length; else sinClientes">
+          <div class="bar-item" *ngFor="let cliente of clientes"><div class="bar-label"><span>{{ cliente.cliente }}</span><strong>{{ monto(cliente.monto) }}</strong></div><div class="bar-track" aria-hidden="true"><span [style.width.%]="porcentaje(cliente.monto, maxCliente)"></span></div><small>{{ cliente.recibos }} {{ cliente.recibos === 1 ? 'recibo' : 'recibos' }} en el período</small></div>
+        </div>
+        <ng-template #sinClientes><p class="empty">Aún no hay cobros por cliente en este período.</p></ng-template>
+      </section>
+    </div>
+    <section class="panel receipts-panel">
+      <div class="panel-heading"><h2>Cobros del período</h2><a routerLink="/reportes/cobros" [queryParams]="{ desde: d.desde.slice(0, 10), hasta: d.hasta.slice(0, 10) }">Ver todos</a></div>
+      <p *ngIf="errorCobros" class="warning-text" role="alert">{{ errorCobros }}</p>
+      <div class="table-scroll" tabindex="0" aria-label="Cobros del período" *ngIf="cobros.length">
+        <table><thead><tr><th scope="col">N.º</th><th scope="col">Cliente</th><th scope="col">Fecha</th><th scope="col">Método de pago</th><th scope="col" class="amount">Total</th></tr></thead><tbody><tr *ngFor="let cobro of cobros"><td>#{{ cobro.pagoId }}</td><td>{{ cobro.cliente }}</td><td>{{ cobro.fecha | date:'dd/MM/yyyy' }}</td><td>{{ cobro.metodoPago }}</td><td class="amount">{{ monto(cobro.montoTotal) }}</td></tr></tbody></table>
+      </div>
+      <p *ngIf="!cobros.length && !errorCobros" class="empty">No hay recibos para el período seleccionado.</p>
+    </section>
+    <div class="chart-grid secondary-grid">
+      <section class="panel"><div class="panel-heading"><h2>Cobros por método</h2></div>
+        <div class="bar-list"><div class="bar-item" *ngFor="let metodo of metodos"><div class="bar-label"><span>{{ metodo.metodo }}</span><strong>{{ monto(metodo.monto) }}</strong></div><div class="bar-track" aria-hidden="true"><span [style.width.%]="porcentaje(metodo.monto, totalMetodos)"></span></div><small>{{ porcentaje(metodo.monto, totalMetodos) | number:'1.0-1' }}% · {{ metodo.recibos }} {{ metodo.recibos === 1 ? 'recibo' : 'recibos' }}</small></div></div>
+        <p *ngIf="!metodos.length" class="empty">Sin cobros por método en este período.</p>
+      </section>
+      <section class="panel"><div class="panel-heading"><h2>Cartera actual</h2><span>Foto actual</span></div><dl class="portfolio"><div><dt>Clientes activos</dt><dd>{{ d.tarjetas.clientesActivos }}</dd></div><div><dt>Préstamos activos</dt><dd>{{ d.tarjetas.prestamosActivos }}</dd></div><div><dt>Contratos activos</dt><dd>{{ d.tarjetas.contratosActivos }}</dd></div><div><dt>Préstamos morosos</dt><dd>{{ d.morosidad.prestamosMorosos }} · {{ monto(d.morosidad.saldoVencidoPrestamos) }}</dd></div><div><dt>Contratos morosos</dt><dd>{{ d.morosidad.contratosMorosos }} · {{ monto(d.morosidad.saldoVencidoContratos) }}</dd></div></dl></section>
+    </div>
+    <section class="panel"><div class="panel-heading"><h2>Morosidad de la cartera</h2><span>Hasta 10 · ordenadas por saldo vencido</span></div>
+      <div class="table-scroll" tabindex="0" aria-label="Obligaciones morosas" *ngIf="d.morosidad.detalle.length; else sinMora"><table><thead><tr><th scope="col">Obligación</th><th scope="col">Cliente</th><th scope="col">Atraso</th><th scope="col">Próximo vencimiento</th><th scope="col" class="amount">Saldo vencido</th></tr></thead><tbody><tr *ngFor="let deuda of d.morosidad.detalle"><td>{{ deuda.tipo }} #{{ deuda.id }}</td><td>{{ deuda.cliente }}</td><td><span class="status warning">{{ deuda.diasAtrasoMax }} días</span></td><td>{{ (deuda.proximoVencimiento | date:'dd/MM/yyyy') || '—' }}</td><td class="amount">{{ monto(deuda.saldoVencido) }}</td></tr></tbody></table></div><ng-template #sinMora><p class="empty">No hay obligaciones morosas.</p></ng-template>
+    </section>
+    <section class="panel"><div class="panel-heading"><h2>Ocupación de propiedades</h2><span>Estado actual</span></div><div class="table-scroll" tabindex="0" aria-label="Ocupación de propiedades" *ngIf="d.series.ocupacionPropiedades.length; else sinPropiedades"><table><thead><tr><th scope="col">Propiedad</th><th scope="col">Estado</th><th scope="col">Contratos activos</th><th scope="col" class="amount">Alquiler mensual</th></tr></thead><tbody><tr *ngFor="let propiedad of d.series.ocupacionPropiedades"><td>{{ propiedad.propiedad }}</td><td><span class="status">{{ propiedad.estado }}</span></td><td>{{ propiedad.contratosActivos }}</td><td class="amount">{{ monto(propiedad.alquilerMensual) }}</td></tr></tbody></table></div><ng-template #sinPropiedades><p class="empty">No hay propiedades para mostrar.</p></ng-template></section>
+    <footer class="dashboard-footer">Los cobros corresponden al período seleccionado. Saldos, morosidad y ocupación reflejan el estado actual. Los pagos anulados están excluidos.</footer>
+  </ng-container>
+</div>

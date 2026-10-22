@@ -1,6 +1,7 @@
 import { PaginatedResponse } from './common.model';
+import { ResumenCobranza, CuotaCobranza, PagoAplicado, FiltroCobranza } from './cobranza.model';
 
-export interface ContratoDto {
+export interface ContratoDto extends ResumenCobranza {
   id: number;
   montoAlquiler: number;
   montoGarantia: number;
@@ -15,9 +16,18 @@ export interface ContratoDto {
   usuarioId: number;
   usuario: string;
   totalPagos: number;
+  alquilerEsperado: number;
+  totalMensualidades: number;
+}
+
+export interface DetalleContrato {
+  contrato: ContratoDto;
+  mensualidades: CuotaCobranza[];
+  pagos: PagoAplicado[];
 }
 
 export interface ContratoFiltros {
+  estadoCobranza?: FiltroCobranza;
   buscar: string;
   pagina: number;
   tamano: number;

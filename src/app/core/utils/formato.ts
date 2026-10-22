@@ -1,11 +1,13 @@
 /**
- * Formato de moneda en pesos colombianos sin registrar el locale de Angular.
+ * Formato de moneda en bolivianos (Bs), conservando los centavos.
  * Intl ya viene en el navegador, asi que no hace falta LOCALE_ID.
  */
-const FORMATEADOR_MONTO = new Intl.NumberFormat('es-CO', {
+const FORMATEADOR_MONTO = new Intl.NumberFormat('es-BO', {
   style: 'currency',
-  currency: 'COP',
-  maximumFractionDigits: 0
+  currency: 'BOB',
+  currencyDisplay: 'narrowSymbol',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
 });
 
 export function formatoMonto(valor: number | null | undefined): string {
@@ -24,7 +26,7 @@ export function fechaParaApi(fecha: Date | null | undefined): string | null {
 
 /**
  * 'yyyy-MM-dd' -> Date local. Se evita `new Date(texto)` porque interpreta
- * la fecha como UTC y en Colombia (UTC-5) mostraria el dia anterior.
+ * la fecha como UTC y en Bolivia (UTC-4) mostraría el día anterior.
  */
 export function fechaDesdeApi(texto: string | null | undefined): Date | null {
   if (!texto) {

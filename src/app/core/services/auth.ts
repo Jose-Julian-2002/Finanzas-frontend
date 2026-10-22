@@ -50,6 +50,18 @@ export class AuthService {
     return localStorage.getItem(TOKEN_KEY);
   }
 
+  usuarioId(): number | null {
+    try {
+      const segmento = this.getToken()?.split('.')[1];
+      if (!segmento) return null;
+      const base64 = segmento.replace(/-/g, '+').replace(/_/g, '/');
+      const claims = JSON.parse(atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')));
+      const id = Number(claims['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
+        ?? claims.nameid ?? claims.sub ?? claims.usuarioId);
+      return Number.isInteger(id) && id > 0 ? id : null;
+    } catch { return null; }
+  }
+
   isLoggedIn(): boolean {
     return !!this.getToken();
   }

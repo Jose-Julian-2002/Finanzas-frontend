@@ -24,13 +24,12 @@ export class PrestamoService {
     let params = new HttpParams()
       .set('pagina', filtros.pagina)
       .set('tamano', filtros.tamano);
+    params = params.set('estadoCobranza', filtros.estadoCobranza ?? 'Todos')
+      .set('soloActivos', filtros.soloActivos);
 
     const buscar = filtros.buscar.trim();
     if (buscar.length > 0) {
       params = params.set('buscar', buscar);
-    }
-    if (filtros.soloActivos) {
-      params = params.set('soloActivos', true);
     }
     if (filtros.clienteId !== null) {
       params = params.set('clienteId', filtros.clienteId);

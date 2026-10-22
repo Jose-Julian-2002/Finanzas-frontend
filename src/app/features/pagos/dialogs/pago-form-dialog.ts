@@ -232,7 +232,7 @@ export class PagoFormDialogComponent implements OnChanges {
 
   /**
    * Anticipo de la regla anti-sobrepago del backend: la suma aplicada a un
-   * prestamo nunca puede exceder su saldo pendiente.
+   * préstamo o contrato nunca puede exceder su saldo pendiente.
    */
   errorDeSaldos(): string | null {
     const acumulado = new Map<string, number>();
@@ -251,8 +251,8 @@ export class PagoFormDialogComponent implements OnChanges {
 
     for (const [clave, monto] of acumulado) {
       const destino = this.buscarDestino(clave);
-      if (destino && destino.saldo !== null && monto > destino.saldo) {
-        return `El prestamo #${destino.id} solo tiene ${formatoMonto(destino.saldo)} por pagar y se aplicó ${formatoMonto(monto)}.`;
+      if (destino && destino.saldo !== null && Math.round(monto * 100) > Math.round(destino.saldo * 100)) {
+        return `${destino.tipo === 'prestamo' ? 'El préstamo' : 'El contrato'} #${destino.id} solo tiene ${formatoMonto(destino.saldo)} por pagar y se aplicó ${formatoMonto(monto)}.`;
       }
     }
 
@@ -264,6 +264,7 @@ export class PagoFormDialogComponent implements OnChanges {
   }
 
   guardar(): void {
+    if (this.isLoading() || this.cargandoDestinos()) return;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -293,7 +294,11 @@ export class PagoFormDialogComponent implements OnChanges {
         return;
       }
 
-      const destino = this.buscarDestino(fila.destino)!;
+      const destino = this.buscarDestino(fila.destino);
+      if (!destino) {
+        this.errorMessage.set('La deuda seleccionada ya no está disponible. Seleccione el destino nuevamente.');
+        return;
+      }
       detalles.push({
         montoAplicado: fila.montoAplicado as number,
         prestamoId: destino.tipo === 'prestamo' ? destino.id : null,
@@ -405,21 +410,21 @@ export class PagoFormDialogComponent implements OnChanges {
         }
 
         const destinos: DestinoOption[] = [
-          ...(prestamos.items ?? []).map((p) => ({
+          ...(prestamos.items ?? []).filter(p => p.saldoPendiente > 0).map((p) => ({
             clave: `P:${p.id}`,
             etiqueta: `Prestamo #${p.id} - cuota ${formatoMonto(p.cuotaMensual)} · saldo ${formatoMonto(p.saldoPendiente)}`,
             tipo: 'prestamo' as const,
             id: p.id,
-            valorDefecto: p.cuotaMensual,
+            valorDefecto: Math.min(p.cuotaMensual, p.saldoPendiente),
             saldo: p.saldoPendiente
           })),
-          ...(contratos.items ?? []).map((c) => ({
+          ...(contratos.items ?? []).filter(c => c.saldoPendiente > 0).map((c) => ({
             clave: `C:${c.id}`,
             etiqueta: `Contrato #${c.id} - ${c.propiedad} (alquiler ${formatoMonto(c.montoAlquiler)})`,
             tipo: 'contrato' as const,
             id: c.id,
-            valorDefecto: c.montoAlquiler,
-            saldo: null
+            valorDefecto: Math.min(c.montoAlquiler, c.saldoPendiente),
+            saldo: c.saldoPendiente
           }))
         ];
 

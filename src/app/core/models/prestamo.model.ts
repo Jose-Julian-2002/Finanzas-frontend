@@ -1,6 +1,7 @@
 import { PaginatedResponse } from './common.model';
+import { ResumenCobranza, CuotaCobranza, PagoAplicado, FiltroCobranza } from './cobranza.model';
 
-export interface PrestamoDto {
+export interface PrestamoDto extends ResumenCobranza {
   id: number;
   montoCapital: number;
   interes: number;
@@ -18,20 +19,17 @@ export interface PrestamoDto {
   saldoPendiente: number;
 }
 
-export interface CuotaPrestamo {
-  numero: number;
-  abonoCapital: number;
-  interes: number;
-  total: number;
-}
+export type CuotaPrestamo = CuotaCobranza;
 
 /** El detalle trae el prestamo mas su tabla de cuotas generadas. */
 export interface DetallePrestamo {
   prestamo: PrestamoDto;
   cuotas: CuotaPrestamo[];
+  pagos: PagoAplicado[];
 }
 
 export interface PrestamoFiltros {
+  estadoCobranza?: FiltroCobranza;
   buscar: string;
   pagina: number;
   tamano: number;

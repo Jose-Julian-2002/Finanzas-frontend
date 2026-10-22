@@ -1,3 +1,5 @@
+import { DatosFinancierosService } from '../../core/services/datos-financieros';
+import { puedeAnularPago } from '../../core/utils/anulacion-pago';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,7 +8,7 @@ import { Button } from 'primeng/button';
 import { Select } from 'primeng/select';
 import { Tooltip } from 'primeng/tooltip';
 import { Dialog } from 'primeng/dialog';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { PagoService } from '../../core/services/pago';
 import { MetodoPagoService } from '../../core/services/metodo-pago';
 import { ClienteService } from '../../core/services/cliente';
@@ -36,6 +38,12 @@ import { PagoFormDialogComponent } from './dialogs/pago-form-dialog';
   styleUrl: './pagos.css'
 })
 export class PagosComponent implements OnInit {
+  readonly incluirAnulados = signal(false);
+  readonly pagoAnulando = signal<PagoDto | null>(null);
+  readonly anulando = signal(false);
+  readonly errorAnulacion = signal('');
+  motivoAnulacion = '';
+  private readonly datosFinancieros = inject(DatosFinancierosService);
   readonly pagos = signal<PagoDto[]>([]);
   readonly total = signal(0);
   readonly cargando = signal(false);
@@ -58,8 +66,7 @@ export class PagosComponent implements OnInit {
     private metodoPagoService: MetodoPagoService,
     private clienteService: ClienteService,
     private authService: AuthService,
-    private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private messageService: MessageService
   ) { }
 
   ngOnInit(): void {
@@ -126,39 +133,55 @@ export class PagosComponent implements OnInit {
   }
 
   alGuardar(): void {
+    this.datosFinancieros.notificar();
+    this.recargar();
+  }
+
+  puedeAnular(pago: PagoDto): boolean {
+    return puedeAnularPago(pago, this.puedeEliminar, this.authService.rol(), this.authService.usuarioId());
+  }
+
+  onIncluirAnulados(valor: boolean): void {
+    this.incluirAnulados.set(valor);
     this.recargar();
   }
 
   confirmarEliminar(pago: PagoDto): void {
-    this.confirmationService.confirm({
-      header: 'Anular recibo',
-      message: `¿Desea anular el recibo #${pago.id} de ${this.formatearMonto(pago.montoTotal)}? El registro y sus detalles se eliminan, y los saldos de los prestamos se recalculan.`,
-      icon: 'pi pi-ban',
-      acceptLabel: 'Anular recibo',
-      rejectLabel: 'Cancelar',
-      acceptButtonStyleClass: 'p-button-danger',
-      accept: () => {
-        this.pagoService.eliminar(pago.id).subscribe({
-          next: () => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Recibo anulado',
-              detail: `El recibo #${pago.id} se eliminó y los saldos se recalculan.`
-            });
-            this.recargar();
-          },
-          error: (err: unknown) => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'No se pudo anular el recibo',
-              detail: mensajeDeError(err)
-            });
-          }
-        });
+    if (!this.puedeAnular(pago)) return;
+    this.motivoAnulacion = '';
+    this.errorAnulacion.set('');
+    this.pagoAnulando.set(pago);
+  }
+
+  anular(): void {
+    const pago = this.pagoAnulando();
+    const motivo = this.motivoAnulacion.trim();
+    if (!pago || this.anulando()) return;
+    if (!motivo) {
+      this.errorAnulacion.set('Ingrese el motivo de anulación.');
+      return;
+    }
+    if (!this.puedeAnular(pago)) {
+      this.errorAnulacion.set('Ya no puede anular este pago. Actualice la lista.');
+      return;
+    }
+    this.anulando.set(true);
+    this.errorAnulacion.set('');
+    this.pagoService.anular(pago.id, motivo).subscribe({
+      next: () => {
+        this.anulando.set(false);
+        this.pagoAnulando.set(null);
+        this.messageService.add({ severity: 'success', summary: 'Pago anulado', detail: 'El recibo se conserva y los saldos se han recalculado.' });
+        this.recargar();
+        if (this.detalleVisible() && this.detalle()?.pago.id === pago.id) this.abrirDetalle(pago);
+        this.datosFinancieros.notificar();
+      },
+      error: (err: unknown) => {
+        this.anulando.set(false);
+        this.errorAnulacion.set(mensajeDeError(err));
       }
     });
   }
-
   private cargarOpcionesFiltros(): void {
     this.metodoPagoService.listar(true).subscribe({
       next: (res) => this.metodos.set(res ?? []),
@@ -185,6 +208,7 @@ export class PagosComponent implements OnInit {
     this.cargando.set(true);
 
     this.pagoService.listar({
+      incluirAnulados: this.incluirAnulados(),
       metodoPagoId: this.filtroMetodoId(),
       clienteId: this.filtroClienteId(),
       pagina: this.paginaActual,

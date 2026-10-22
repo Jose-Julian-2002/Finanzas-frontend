@@ -1,0 +1,48 @@
+<app-dashboard *ngIf="tipo() === 'Dashboard'" [datos]="dashboard()" [cobros]="cobrosDashboard()" [errorCobros]="errorCobrosDashboard()" [cargando]="cargando()" [error]="error()" (filtrar)="filtrarDashboard($event)"></app-dashboard>
+<div class="page" *ngIf="tipo() !== 'Dashboard'">
+  <div class="page-header"><div><h1>Reportes · {{ titulo }}</h1><p class="page-subtitle">Cobros vigentes y seguimiento de la cartera según el alcance de su cuenta.</p></div></div>
+  <nav class="reporte-nav" aria-label="Reportes">
+    <a *ngFor="let seccion of secciones" [routerLink]="['/reportes', seccion.ruta]" routerLinkActive="active" ariaCurrentWhenActive="page">{{ seccion.titulo }}</a>
+  </nav>
+  <form class="filtros" (ngSubmit)="aplicar()">
+    <ng-container *ngIf="tipo() === 'Dashboard' || tipo() === 'Cobros'">
+      <label>Desde<input type="date" name="desde" [(ngModel)]="filtros.desde" /></label>
+      <label>Hasta<input type="date" name="hasta" [(ngModel)]="filtros.hasta" /></label>
+    </ng-container>
+    <ng-container *ngIf="tipo() !== 'Dashboard'">
+      <label>Cliente (ID)<input type="number" min="1" step="1" name="cliente" [(ngModel)]="filtros.clienteId" /></label>
+      <ng-container *ngIf="tipo() === 'Cobros'; else cartera">
+        <label>Método de pago (ID)<input type="number" min="1" step="1" name="metodo" [(ngModel)]="filtros.metodoPagoId" /></label>
+        <label>Préstamo (ID)<input type="number" min="1" step="1" name="prestamo" [(ngModel)]="filtros.prestamoId" /></label>
+        <label>Contrato (ID)<input type="number" min="1" step="1" name="contrato" [(ngModel)]="filtros.contratoId" /></label>
+      </ng-container>
+      <ng-template #cartera>
+        <label>Buscar<input type="search" name="buscar" [(ngModel)]="filtros.buscar" /></label>
+        <label>Estado de cobranza<p-select name="cobranza" [(ngModel)]="filtros.estadoCobranza" [options]="opcionesCobranza" optionLabel="label" optionValue="value" aria-label="Estado de cobranza"></p-select></label>
+        <label *ngIf="tipo() === 'Contratos'">Propiedad (ID)<input type="number" min="1" step="1" name="propiedad" [(ngModel)]="filtros.propiedadId" /></label>
+        <label class="check"><input type="checkbox" name="activos" [(ngModel)]="filtros.soloActivos" /> Solo activos</label>
+      </ng-template>
+    </ng-container>
+    <p-button type="submit" label="Consultar" icon="pi pi-search" [loading]="cargando()"></p-button>
+  </form>
+  <p *ngIf="error()" class="field-error" role="alert">{{ error() }}</p>
+  <p *ngIf="cargando()" role="status">Cargando reporte…</p>
+  <ng-container *ngIf="!cargando() && !error()">
+    <ng-container *ngIf="tipo() !== 'Dashboard'">
+      <p class="reporte-total">{{ total() }} {{ tipo() === 'Cobros' ? 'recibos' : 'registros' }} encontrados</p>
+      <ng-container *ngIf="tipo() === 'Cobros'; else tablaCartera">
+        <article class="recibo" *ngFor="let cobro of cobros()">
+          <h2>Recibo #{{ cobro.pagoId }} · {{ cobro.cliente }}</h2>
+          <p>{{ cobro.fecha | date:'dd/MM/yyyy HH:mm' }} · {{ cobro.metodoPago }} · {{ cobro.usuario }}</p>
+          <p><strong>Total: {{ monto(cobro.montoTotal) }}</strong></p>
+          <app-reporte-tabla [filas]="registros(cobro.detalles)" titulo="Aplicaciones del recibo"></app-reporte-tabla>
+        </article>
+        <p *ngIf="!cobros().length" class="estado-vacio">No hay cobros para los filtros seleccionados.</p>
+      </ng-container>
+      <ng-template #tablaCartera><app-reporte-tabla [filas]="filas()" [titulo]="titulo"></app-reporte-tabla></ng-template>
+    </ng-container>
+  </ng-container>
+  <p-paginator *ngIf="tipo() !== 'Dashboard'" (onPageChange)="paginar($event)" [showCurrentPageReport]="true" [rows]="filtros.tamano ?? 50" [first]="primer" [totalRecords]="total()" [rowsPerPageOptions]="[20, 50, 100, 500]" currentPageReportTemplate="{first} a {last} de {totalRecords}"></p-paginator>
+</div>
+
+

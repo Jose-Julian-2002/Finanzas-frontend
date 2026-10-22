@@ -28,8 +28,8 @@
     <div class="form-grid">
       <div class="field">
         <label for="conAlquiler">Alquiler mensual</label>
-        <p-inputnumber inputId="conAlquiler" formControlName="montoAlquiler" mode="currency" currency="COP"
-          locale="es-CO" [min]="0" placeholder="0"></p-inputnumber>
+        <p-inputnumber inputId="conAlquiler" formControlName="montoAlquiler" mode="currency" currency="BOB" currencyDisplay="narrowSymbol"
+          locale="es-BO" [minFractionDigits]="2" [maxFractionDigits]="2" [min]="0" placeholder="0"></p-inputnumber>
         <small class="field-error" *ngIf="montoAlquiler.invalid && montoAlquiler.touched">
           Ingrese un monto mayor que cero.
         </small>
@@ -37,8 +37,8 @@
 
       <div class="field">
         <label for="conGarantia">Garantia</label>
-        <p-inputnumber inputId="conGarantia" formControlName="montoGarantia" mode="currency" currency="COP"
-          locale="es-CO" [min]="0" placeholder="0"></p-inputnumber>
+        <p-inputnumber inputId="conGarantia" formControlName="montoGarantia" mode="currency" currency="BOB" currencyDisplay="narrowSymbol"
+          locale="es-BO" [minFractionDigits]="2" [maxFractionDigits]="2" [min]="0" placeholder="0"></p-inputnumber>
         <small class="field-error" *ngIf="montoGarantia.invalid && montoGarantia.touched">
           Ingrese un monto mayor que cero.
         </small>

@@ -61,6 +61,13 @@
 
 <ng-template #navigation>
   <nav class="drawer-links" aria-label="Secciones">
+    <section class="nav-section" *ngIf="puedeVerReportes" aria-label="Reportes">
+      <h2 class="nav-section-title">Reportes</h2>
+      <a routerLink="/reportes/dashboard" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="drawerVisible.set(false)"><i class="pi pi-chart-bar" aria-hidden="true"></i><span>Dashboard</span></a>
+      <a routerLink="/reportes/cobros" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="drawerVisible.set(false)"><i class="pi pi-receipt" aria-hidden="true"></i><span>Cobros</span></a>
+      <a routerLink="/reportes/prestamos" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="drawerVisible.set(false)"><i class="pi pi-dollar" aria-hidden="true"></i><span>Préstamos</span></a>
+      <a routerLink="/reportes/contratos" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="drawerVisible.set(false)"><i class="pi pi-file" aria-hidden="true"></i><span>Contratos</span></a>
+    </section>
     <section class="nav-section" *ngIf="puedeVerClientes || puedeVerPrestamos || puedeVerPagos" aria-label="Gestión financiera">
       <h2 class="nav-section-title">Gestión financiera</h2>
       <a routerLink="/clientes" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="puedeVerClientes" (click)="drawerVisible.set(false)">

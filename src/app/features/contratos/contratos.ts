@@ -1,3 +1,6 @@
+import { FiltroCobranza, OPCIONES_COBRANZA } from '../../core/models/cobranza.model';
+import { CobranzaDetalleComponent } from '../../shared/cobranza-detalle';
+import { DatosFinancierosService } from '../../core/services/datos-financieros';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DatePipe } from '@angular/common';
@@ -16,7 +19,7 @@ import { ContratoService } from '../../core/services/contrato';
 import { ClienteService } from '../../core/services/cliente';
 import { PropiedadService } from '../../core/services/propiedad';
 import { AuthService } from '../../core/services/auth';
-import { ContratoDto } from '../../core/models/contrato.model';
+import { ContratoDto, DetalleContrato } from '../../core/models/contrato.model';
 import { ClienteDto } from '../../core/models/cliente.model';
 import { PropiedadDto } from '../../core/models/propiedad.model';
 import { mensajeDeError } from '../../core/utils/api-error';
@@ -27,6 +30,7 @@ import { ContratoFormDialogComponent } from './dialogs/contrato-form-dialog';
   selector: 'app-contratos',
   standalone: true,
   imports: [
+    CobranzaDetalleComponent,
     CommonModule,
     DatePipe,
     FormsModule,
@@ -53,6 +57,8 @@ export class ContratosComponent implements OnInit {
   readonly cargando = signal(false);
   readonly primer = signal(0);
   readonly tamano = signal(20);
+  readonly estadoCobranza = signal<FiltroCobranza>('Todos');
+  readonly opcionesCobranza = OPCIONES_COBRANZA;
   readonly soloActivos = signal(true);
   readonly filtroClienteId = signal<number | null>(null);
   readonly filtroPropiedadId = signal<number | null>(null);
@@ -66,17 +72,23 @@ export class ContratosComponent implements OnInit {
   readonly detalleVisible = signal(false);
   readonly detalleCargando = signal(false);
   readonly contratoDetalle = signal<ContratoDto | null>(null);
+  readonly detalle = signal<DetalleContrato | null>(null);
 
   constructor(
     private contratoService: ContratoService,
     private clienteService: ClienteService,
     private propiedadService: PropiedadService,
+    private datosFinancieros: DatosFinancierosService,
     private authService: AuthService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService
   ) { }
 
   ngOnInit(): void {
+    this.datosFinancieros.cambios$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.cargar();
+      if (this.detalleVisible() && this.contratoDetalle()) this.abrirDetalle(this.contratoDetalle()!);
+    });
     this.controlBusqueda.valueChanges
       .pipe(debounceTime(400), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.recargar());
@@ -113,6 +125,11 @@ export class ContratosComponent implements OnInit {
 
   onCambiarSoloActivos(valor: boolean): void {
     this.soloActivos.set(valor);
+    this.recargar();
+  }
+
+  onFiltroCobranza(valor: FiltroCobranza): void {
+    this.estadoCobranza.set(valor);
     this.recargar();
   }
 
@@ -189,12 +206,14 @@ export class ContratosComponent implements OnInit {
 
   abrirDetalle(contrato: ContratoDto): void {
     this.contratoDetalle.set(null);
+    this.detalle.set(null);
     this.detalleCargando.set(true);
     this.detalleVisible.set(true);
 
     this.contratoService.obtener(contrato.id).subscribe({
       next: (detalle) => {
-        this.contratoDetalle.set(detalle);
+        this.contratoDetalle.set(detalle.contrato);
+        this.detalle.set(detalle);
         this.detalleCargando.set(false);
       },
       error: (err: unknown) => {
@@ -245,6 +264,7 @@ export class ContratosComponent implements OnInit {
     this.cargando.set(true);
 
     this.contratoService.listar({
+      estadoCobranza: this.estadoCobranza(),
       buscar: this.controlBusqueda.value,
       pagina: this.paginaActual,
       tamano: this.tamano(),
